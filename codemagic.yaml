@@ -1,0 +1,174 @@
+workflows:
+  ios-release:
+    name: Chemistry Practical Exam Coach - iOS Release
+    max_build_duration: 60
+
+    integrations:
+      app_store_connect: Physics Practical Exam Coach
+
+    environment:
+      xcode: latest
+
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.nowsathrifaya.chemistrycoach
+
+      vars:
+        BUNDLE_ID: "com.nowsathrifaya.chemistrycoach"
+        XCODE_PROJECT: "ChemistryCoach.xcodeproj"
+        XCODE_SCHEME: "ChemistryCoach"
+        APP_VERSION: "1.1.0"
+
+    scripts:
+
+      # ==========================================
+      # 1. GENERATE XCODE PROJECT
+      # ==========================================
+      - name: Install XcodeGen and generate project
+        script: |
+          set -e
+
+          echo "=========================================="
+          echo "GENERATING XCODE PROJECT"
+          echo "=========================================="
+
+          brew install xcodegen || true
+
+          echo "Current directory:"
+          pwd
+
+          echo "Repository contents:"
+          ls -la
+
+          if [ ! -f "project.yml" ]; then
+            echo "ERROR: project.yml not found"
+            exit 1
+          fi
+
+          xcodegen generate
+
+          if [ ! -d "ChemistryCoach.xcodeproj" ]; then
+            echo "ERROR: ChemistryCoach.xcodeproj was not generated"
+            exit 1
+          fi
+
+          echo "Xcode project generated successfully."
+
+      # ==========================================
+      # 2. SET VERSION / BUILD
+      # ==========================================
+      - name: Set application version and build number
+        script: |
+          set -e
+
+          echo "=========================================="
+          echo "SETTING VERSION"
+          echo "=========================================="
+
+          xcrun agvtool new-marketing-version "$APP_VERSION"
+
+          BUILD_NUMBER_VALUE="${BUILD_NUMBER:-2}"
+
+          if [ "$BUILD_NUMBER_VALUE" -lt 2 ]; then
+            BUILD_NUMBER_VALUE=2
+          fi
+
+          echo "Marketing Version: $APP_VERSION"
+          echo "Build Number: $BUILD_NUMBER_VALUE"
+
+          xcrun agvtool new-version -all "$BUILD_NUMBER_VALUE"
+
+          echo "Checking final settings..."
+
+          xcodebuild \
+            -project "$XCODE_PROJECT" \
+            -scheme "$XCODE_SCHEME" \
+            -showBuildSettings | \
+            grep -E \
+            "PRODUCT_BUNDLE_IDENTIFIER|MARKETING_VERSION|CURRENT_PROJECT_VERSION"
+
+      # ==========================================
+      # 3. USE CODEMAGIC AUTOMATIC SIGNING
+      # ==========================================
+      - name: Configure code signing
+        script: |
+          set -e
+
+          echo "=========================================="
+          echo "CODE SIGNING"
+          echo "=========================================="
+
+          echo "Bundle ID: $BUNDLE_ID"
+
+          if [ -z "$BUNDLE_ID" ]; then
+            echo "ERROR: BUNDLE_ID is empty"
+            exit 1
+          fi
+
+          echo "Using Codemagic iOS signing configuration."
+          echo "Distribution type: App Store"
+          echo "Bundle ID: $BUNDLE_ID"
+
+          # Apply the provisioning profiles downloaded
+          # by Codemagic's ios_signing environment.
+          xcode-project use-profiles
+
+          echo "Code signing configuration applied successfully."
+
+      # ==========================================
+      # 4. VERIFY
+      # ==========================================
+      - name: Verify project
+        script: |
+          set -e
+
+          echo "=========================================="
+          echo "VERIFYING PROJECT"
+          echo "=========================================="
+
+          test -d "$XCODE_PROJECT"
+
+          echo "Project:"
+          echo "$XCODE_PROJECT"
+
+          echo "Scheme:"
+          echo "$XCODE_SCHEME"
+
+          echo "Bundle ID:"
+          echo "$BUNDLE_ID"
+
+          xcodebuild \
+            -project "$XCODE_PROJECT" \
+            -scheme "$XCODE_SCHEME" \
+            -showBuildSettings | \
+            grep -E \
+            "PRODUCT_BUNDLE_IDENTIFIER|MARKETING_VERSION|CURRENT_PROJECT_VERSION|CODE_SIGN"
+
+      # ==========================================
+      # 5. BUILD IPA
+      # ==========================================
+      - name: Build IPA
+        script: |
+          set -e
+
+          echo "=========================================="
+          echo "BUILDING IPA"
+          echo "=========================================="
+
+          xcode-project build-ipa \
+            --project "$XCODE_PROJECT" \
+            --scheme "$XCODE_SCHEME"
+
+          echo "=========================================="
+          echo "IPA BUILD COMPLETE"
+          echo "=========================================="
+
+          ls -lah build/ios/ipa/
+
+    artifacts:
+      - build/ios/ipa/*.ipa
+
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true

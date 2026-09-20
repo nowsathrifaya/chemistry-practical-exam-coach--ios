@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>NSPrivacyTracking</key>
+	<false/>
+	<key>NSPrivacyTrackingDomains</key>
+	<array/>
+	<!--
+	  This app doesn't send data off-device — attempts, stats, and study
+	  progress are all stored locally via SwiftData and UserDefaults, so
+	  there are no collected data types to declare here.
+	-->
+	<key>NSPrivacyCollectedDataTypes</key>
+	<array/>
+	<!--
+	  "Required Reason APIs": Apple requires any use of UserDefaults to
+	  declare why, even for an app's own local settings. This app uses it
+	  in UserPreferencesStore (selected curriculum / onboarding status) —
+	  that's this app's own data, not shared via an App Group, so reason
+	  CA92.1 applies. Without this file, App Store Connect's automated
+	  privacy scan can hold up review or flag the build.
+	-->
+	<key>NSPrivacyAccessedAPITypes</key>
+	<array>
+		<dict>
+			<key>NSPrivacyAccessedAPIType</key>
+			<string>NSPrivacyAccessedAPICategoryUserDefaults</string>
+			<key>NSPrivacyAccessedAPITypeReasons</key>
+			<array>
+				<string>CA92.1</string>
+			</array>
+		</dict>
+	</array>
+</dict>
+</plist>

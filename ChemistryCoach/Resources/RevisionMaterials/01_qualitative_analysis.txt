@@ -1,0 +1,193 @@
+================================================================================
+QUALITATIVE ANALYSIS — COMPLETE REFERENCE
+Singapore GCE O-Level Chemistry (6092) Paper 3
+================================================================================
+
+The Notes for Qualitative Analysis are printed inside Paper 3. Candidates
+cannot bring their own notes. Use this reference for study and revision only.
+
+During the practical exam, use approximately 1 cm depth of solution (1-2 cm3)
+for each test and add reagents slowly, ensuring good mixing, until no further
+change is seen.
+
+--------------------------------------------------------------------------------
+SECTION 1: CATION TESTS
+--------------------------------------------------------------------------------
+
+Two main reagents are used: aqueous sodium hydroxide (NaOH) and aqueous
+ammonia (NH3). Add the reagent slowly, then add excess.
+
+CATION     | NaOH (add, then excess)           | NH3 (add, then excess)
+-----------+-----------------------------------+----------------------------------
+NH4+       | Gas produced on warming; gas      | (Use NaOH test instead)
+(ammonium) | turns damp red litmus blue         |
+           |                                   |
+Ca2+       | White precipitate; insoluble in    | No precipitate
+(calcium)  | excess NaOH                        |
+           |                                   |
+Cu2+       | Light blue precipitate; insoluble  | Light blue precipitate; dissolves
+(copper)   | in excess NaOH                     | in excess NH3 to form deep blue
+           |                                   | solution
+           |                                   |
+Fe2+       | Green precipitate; insoluble in    | Green precipitate; insoluble in
+(iron II)  | excess; turns brown on standing    | excess; turns brown on standing
+           |                                   |
+Fe3+       | Reddish-brown precipitate;         | Reddish-brown precipitate;
+(iron III) | insoluble in excess                | insoluble in excess
+           |                                   |
+Zn2+       | White precipitate; dissolves in    | White precipitate; dissolves in
+(zinc)     | excess NaOH to form colourless     | excess NH3 to form colourless
+           | solution                           | solution
+           |                                   |
+Al3+       | White precipitate; dissolves in    | White precipitate; insoluble in
+(aluminium)| excess NaOH to form colourless     | excess NH3
+           | solution                           |
+           |                                   |
+Pb2+       | White precipitate; dissolves in    | White precipitate; dissolves in
+(lead)     | excess NaOH                        | excess NH3
+
+KEY DISTINCTIONS:
+- Al3+ vs Zn2+: Both give white ppt with NaOH, soluble in excess.
+  DISTINGUISHER: Add excess NH3. Al3+ gives white ppt INSOLUBLE in excess NH3.
+  Zn2+ gives white ppt SOLUBLE in excess NH3.
+- Ca2+: White ppt with NaOH (insoluble in excess) but NO ppt with NH3.
+- NH4+: No precipitate. Warm with NaOH; test gas with damp red litmus.
+
+--------------------------------------------------------------------------------
+SECTION 2: ANION TESTS
+--------------------------------------------------------------------------------
+
+ANION          | REAGENT & PROCEDURE              | OBSERVATION & INFERENCE
+---------------+----------------------------------+--------------------------
+CO3 2-         | Add dilute acid (e.g. HCl or     | Effervescence; gas turns
+(carbonate)    | HNO3). Test gas with limewater.   | limewater milky = CO2 present.
+               |                                  | Carbonate ion confirmed.
+               |                                  |
+Cl-            | Acidify with dilute nitric acid,  | White precipitate (AgCl);
+(chloride)     | then add silver nitrate (AgNO3)   | insoluble in dilute HNO3.
+               | solution.                         | Chloride ion confirmed.
+               |                                  |
+Br-            | Acidify with dilute nitric acid,  | Cream precipitate (AgBr);
+(bromide)      | then add silver nitrate.          | insoluble in dilute HNO3.
+               |                                  |
+I-             | Acidify with dilute nitric acid,  | Yellow precipitate (AgI);
+(iodide)       | then add silver nitrate.          | insoluble in dilute HNO3.
+               |                                  |
+SO4 2-         | Acidify with dilute nitric acid,  | White precipitate (BaSO4);
+(sulfate)      | then add barium nitrate (Ba(NO3)2| insoluble in dilute HNO3.
+               | or BaCl2).                        | Sulfate ion confirmed.
+               |                                  |
+NO3-           | Add sodium hydroxide (NaOH) and   | Ammonia gas produced; pungent
+(nitrate)      | aluminium foil; warm gently. Test | smell; turns damp red litmus
+               | gas with damp red litmus.         | blue. Nitrate ion confirmed.
+               |                                  |
+PO4 3-         | Acidify with dilute nitric acid,  | Yellow precipitate.
+(phosphate)    | then add ammonium molybdate;     |
+               | warm.                             |
+
+IMPORTANT: Always acidify with NITRIC acid (HNO3) before adding silver nitrate
+or barium nitrate. Do NOT use hydrochloric acid — it introduces chloride ions
+and gives a false positive for Cl-.
+
+--------------------------------------------------------------------------------
+SECTION 3: GAS TESTS
+--------------------------------------------------------------------------------
+
+GAS           | TEST                             | OBSERVATION & INFERENCE
+--------------+----------------------------------+--------------------------
+Hydrogen (H2) | Apply a lighted splint.           | "Pop" sound heard.
+              |                                  | Hydrogen present.
+              |                                  |
+Oxygen (O2)   | Apply a glowing splint.           | Splint relights.
+              |                                  | Oxygen present.
+              |                                  |
+Carbon dioxide| Bubble gas into limewater.        | Limewater turns milky.
+(CO2)         |                                  | CO2 present.
+              |                                  |
+Ammonia (NH3) | Expose damp red litmus to gas.    | Pungent smell; turns damp red
+              |                                  | litmus blue. Ammonia present.
+              |                                  |
+Chlorine (Cl2)| Expose damp blue litmus to gas.   | Greenish-yellow gas; turns
+              |                                  | damp blue litmus red, then
+              |                                  | bleaches it. Chlorine present.
+              |                                  |
+Sulfur dioxide| Pass gas into acidified potassium | Acidified KMnO4 changes from
+(SO2)         | manganate(VII) solution.         | purple to colourless. SO2
+              |                                  | present.
+
+--------------------------------------------------------------------------------
+SECTION 4: FLAME TESTS
+--------------------------------------------------------------------------------
+
+Clean a platinum or nichrome wire by dipping in concentrated hydrochloric acid
+and heating in a non-luminous Bunsen flame until no colour is seen. Moisten the
+wire with acid, dip into the sample, and hold in the flame.
+
+ION        | FLAME COLOUR
+-----------+------------------
+Li+        | Crimson red
+(lithium)  |
+Na+        | Bright yellow (intense, persistent)
+(sodium)   |
+K+         | Lilac / pale violet
+(potassium)|
+Ca2+       | Orange-red
+(calcium)  |
+Ba2+       | Apple green / pale green
+(barium)   |
+Cu2+       | Blue-green
+(copper)   |
+
+MNEMONIC: "Little Naughty Kids Can Be Clever"
+Li (crimson) -> Na (yellow) -> K (lilac) -> Ca (orange-red) -> Ba (green) -> Cu (blue-green)
+
+--------------------------------------------------------------------------------
+SECTION 5: INDICATORS
+--------------------------------------------------------------------------------
+
+INDICATOR        | pH RANGE  | ACID COLOUR    | ALKALI COLOUR
+-----------------+-----------+----------------+------------------
+Methyl orange    | 3.1 - 4.4 | Red            | Yellow
+Phenolphthalein  | 8.2 - 10.0| Colourless      | Pink
+Universal        | 1 - 14   | Red (pH 1)     | Violet (pH 14)
+Indicator        |           |                | (full spectrum)
+
+CHOOSING AN INDICATOR FOR TITRATION:
+- Strong acid + strong alkali: phenolphthalein OR methyl orange
+- Strong acid + weak alkali: methyl orange (endpoint in acidic pH range)
+- Weak acid + strong alkali: phenolphthalein (endpoint in basic pH range)
+- Universal Indicator is NOT suitable for titrations (gradual colour change)
+
+--------------------------------------------------------------------------------
+SECTION 6: COMMON QA MISTAKES
+--------------------------------------------------------------------------------
+
+1. Writing an inference as an observation. "Chloride ion present" is an
+   inference. "White precipitate formed" is an observation. Record what you
+   SEE first, then state the inference.
+
+2. Using hydrochloric acid to acidify before adding silver nitrate. HCl
+   introduces Cl- ions and gives a false white precipitate. Always use
+   dilute NITRIC acid.
+
+3. Not testing for solubility in excess. Al3+ and Zn2+ both give white ppt
+   with NaOH. You MUST add excess to distinguish (Al3+ dissolves in excess
+   NaOH; Zn2+ also dissolves in excess NaOH — use NH3 to distinguish them).
+
+4. Saying "bubbles form" without identifying or testing the gas. For
+   carbonate, you must test the gas with limewater.
+
+5. Claiming a single ion without a confirmatory test. A white precipitate
+   with NaOH could be Ca2+, Zn2+, Al3+, or Pb2+. Always do the excess test
+   and the NH3 test before concluding.
+
+6. Not warming with NaOH for the ammonium test. The gas (NH3) is only
+   released on warming.
+
+7. For nitrate test: forgetting to add aluminium foil AND NaOH together.
+   Both are needed.
+
+Sources:
+- https://www.focuschemistry.com/blogs/2025/o-level-qualitative-analysis-guide
+- https://eclatinstitute.sg/blog/o-level-chemistry-experiments/O-Level-Chemistry-Qualitative-Analysis-Toolkit
+- https://ethantuition.com/wp-content/uploads/2024/07/chemistry-2024.pdf (SEAB 6092 syllabus)

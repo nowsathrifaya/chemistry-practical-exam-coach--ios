@@ -1,0 +1,193 @@
+================================================================================
+ELECTROLYSIS — COMPLETE REFERENCE
+Singapore GCE O-Level Chemistry (6092)
+================================================================================
+
+--------------------------------------------------------------------------------
+SECTION 1: KEY CONCEPTS
+--------------------------------------------------------------------------------
+
+Electrolysis = decomposition of an electrolyte by electricity.
+
+- ELECTROLYTE: A substance that conducts electricity when molten or in
+  aqueous solution, and is decomposed by it. Electrolytes contain free-moving
+  ions.
+
+- ANODE (+): Positive electrode. Connected to the positive terminal of the
+  battery. Anions (negative ions) are attracted here. OXIDATION occurs
+  (loss of electrons).
+
+- CATHODE (-): Negative electrode. Connected to the negative terminal.
+  Cations (positive ions) are attracted here. REDUCTION occurs
+  (gain of electrons).
+
+MEMORY AID: "CAThode attracts CAT-ions" (cathode = negative, attracts + ions)
+            "Anion" = "AN-ION" (anions go to anode)
+            "OIL RIG": Oxidation Is Loss, Reduction Is Gain (of electrons)
+            "Red Cat": REDuction occurs at the CAThode
+
+--------------------------------------------------------------------------------
+SECTION 2: MOLTEN ELECTROLYTES
+--------------------------------------------------------------------------------
+
+When a pure ionic compound is melted, only its own ions are present.
+Predicting products is straightforward.
+
+EXAMPLE: Electrolysis of molten lead(II) bromide (PbBr2)
+
+  | Electrode  | Ion discharged | Product              | Half-equation
+  |------------+-----------------+----------------------+--------------------
+  | Cathode (-)| Pb2+            | Lead metal (grey)    | Pb2+ + 2e- -> Pb
+  | Anode (+)  | Br-             | Bromine (brown gas)  | 2Br- -> Br2 + 2e-
+
+--------------------------------------------------------------------------------
+SECTION 3: AQUEOUS ELECTROLYTES — SELECTIVE DISCHARGE
+--------------------------------------------------------------------------------
+
+When an ionic compound is dissolved in water, H+ and OH- ions from water are
+also present. At each electrode, competing ions exist. Only one is
+preferentially discharged.
+
+AT THE CATHODE (reduction):
+  - If the metal is BELOW hydrogen in the reactivity series (less reactive,
+    e.g. Cu, Ag, Au):
+    -> The METAL ION is discharged (e.g. Cu2+ + 2e- -> Cu)
+  - If the metal is ABOVE hydrogen in the reactivity series (more reactive,
+    e.g. Na, K, Ca, Mg, Al):
+    -> HYDROGEN is discharged instead (2H+ + 2e- -> H2)
+  - If the metal is near hydrogen (e.g. Zn, Fe):
+    -> HYDROGEN is usually discharged (rule of thumb at O-Level)
+
+AT THE ANODE (oxidation):
+  - If HALIDE ions (Cl-, Br-, I-) are present in HIGH concentration:
+    -> The HALIDE is discharged (e.g. 2Cl- -> Cl2 + 2e-)
+  - Otherwise (no halide, or dilute halide):
+    -> OXYGEN is discharged from OH- (4OH- -> O2 + 2H2O + 4e-)
+
+REACTIVITY SERIES (relevant part):
+  K, Na, Ca, Mg, Al, [Zn, Fe], H, Cu, Ag, Au
+  <-- more reactive                        less reactive -->
+
+  Metals LEFT of H: hydrogen discharged at cathode
+  Metals RIGHT of H: metal discharged at cathode
+
+--------------------------------------------------------------------------------
+SECTION 4: COMMON ELECTROLYSIS EXAMPLES
+================================================================================
+
+EXAMPLE 1: Electrolysis of aqueous copper(II) sulfate (CuSO4) with inert
+electrodes (e.g. carbon/platinum)
+
+  Ions present: Cu2+, SO4 2-, H+, OH-
+
+  Cathode: Cu2+ is below hydrogen -> Cu discharged
+    Cu2+(aq) + 2e- -> Cu(s)
+    Observation: Reddish-brown deposit on cathode.
+
+  Anode: No halide present -> OH- discharged -> O2
+    4OH-(aq) -> O2(g) + 2H2O(l) + 4e-
+    Observation: Bubbles of colourless gas (relights glowing splint).
+
+  Overall: Blue colour of solution fades (Cu2+ removed). H+ builds up,
+  solution becomes acidic (H2SO4 remains).
+
+EXAMPLE 2: Electrolysis of dilute sodium chloride solution (NaCl)
+
+  Ions present: Na+, Cl-, H+, OH-
+
+  Cathode: Na+ is above hydrogen -> H2 discharged
+    2H+(aq) + 2e- -> H2(g)
+    Observation: Bubbles of colourless gas (pop with lighted splint).
+
+  Anode: Cl- is dilute -> OH- discharged -> O2
+    4OH-(aq) -> O2(g) + 2H2O(l) + 4e-
+    Observation: Bubbles of colourless gas (relights glowing splint).
+
+EXAMPLE 3: Electrolysis of CONCENTRATED sodium chloride solution (brine)
+
+  Cathode: Same as above -> H2 discharged
+    2H+(aq) + 2e- -> H2(g)
+
+  Anode: Cl- is in HIGH concentration -> Cl2 discharged
+    2Cl-(aq) -> Cl2(g) + 2e-
+    Observation: Greenish-yellow gas (bleaches damp blue litmus).
+
+  Overall: Na+ and OH- remain -> sodium hydroxide forms. This is the
+  industrial chlor-alkali process.
+
+EXAMPLE 4: Electrolysis of dilute sulfuric acid (H2SO4)
+
+  Ions present: H+, SO4 2-, OH-
+
+  Cathode: H+ discharged
+    2H+(aq) + 2e- -> H2(g)
+
+  Anode: No halide -> OH- discharged
+    4OH-(aq) -> O2(g) + 2H2O(l) + 4e-
+
+  Overall: Water is decomposed. H2SO4 becomes more concentrated (water
+  removed, acid remains).
+
+EXAMPLE 5: Electrolysis of molten aluminium oxide (Al2O3) — industrial
+
+  Cathode: Al3+ + 3e- -> Al
+  Anode: 2O2- -> O2 + 4e-
+
+  Used in the Hall-Heroult process. Cryolite is added to lower the melting
+  point from ~2000C to ~950C.
+
+--------------------------------------------------------------------------------
+SECTION 5: WRITING HALF-EQUATIONS
+--------------------------------------------------------------------------------
+
+RULES:
+1. Balance the atoms first.
+2. Balance the charge by adding electrons.
+3. Electrons go on the LEFT for reduction (cathode).
+4. Electrons go on the RIGHT for oxidation (anode).
+
+Cathode (reduction) examples:
+  Cu2+(aq) + 2e- -> Cu(s)
+  Pb2+(aq) + 2e- -> Pb(s)
+  Ag+(aq) + e- -> Ag(s)
+  Al3+(aq) + 3e- -> Al(s)
+  2H+(aq) + 2e- -> H2(g)
+
+Anode (oxidation) examples:
+  2Cl-(aq) -> Cl2(g) + 2e-
+  2Br-(aq) -> Br2(l) + 2e-
+  2I-(aq) -> I2(s) + 2e-
+  4OH-(aq) -> O2(g) + 2H2O(l) + 4e-
+
+CHECK: The number of electrons must match the charge on the ion.
+  Cu2+ needs 2 electrons. Al3+ needs 3 electrons.
+
+--------------------------------------------------------------------------------
+SECTION 6: COMMON ELECTROLYSIS MISTAKES
+--------------------------------------------------------------------------------
+
+1. Reversing anode/cathode. Anode = positive = oxidation. Cathode =
+   negative = reduction. Do NOT reverse these.
+
+2. Forgetting that water provides H+ and OH- ions in aqueous solutions.
+   These compete with the dissolved ions.
+
+3. Saying "oxygen is discharged at the anode" without explaining it comes
+   from OH- ions. Show the half-equation.
+
+4. Not balancing electrons in half-equations. Each side must have the same
+   total charge.
+
+5. Confusing "concentrated" and "dilute" for NaCl electrolysis. Concentrated
+   -> Cl2 at anode. Dilute -> O2 at anode. This is the most tested distinction.
+
+6. Saying the solution becomes more alkaline after CuSO4 electrolysis. It
+   becomes more ACIDIC (H+ and SO4 2- remain, water is consumed, Cu2+
+   depleted).
+
+7. Not stating observations. "Copper is deposited" is correct but incomplete.
+   Say "reddish-brown solid deposited on the cathode."
+
+Sources:
+- https://ionxlabs.sg/electrolysis-o-level/
+- https://intuitional.sg/blog/o-level-pure-chemistry-electrolysis-how-to-predict-the-products

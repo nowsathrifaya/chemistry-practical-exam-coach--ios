@@ -1,0 +1,175 @@
+================================================================================
+ENERGY CHANGES AND CALORIMETRY — COMPLETE REFERENCE
+Singapore GCE O-Level Chemistry (6092)
+================================================================================
+
+--------------------------------------------------------------------------------
+SECTION 1: EXOTHERMIC vs ENDOTHERMIC REACTIONS
+--------------------------------------------------------------------------------
+
+EXOTHERMIC REACTION:
+  - Heat is RELEASED to the surroundings.
+  - Temperature of surroundings INCREASES.
+  - Energy of products < energy of reactants.
+  - Delta H is NEGATIVE (-).
+  - Examples: combustion, neutralisation, respiration, rusting.
+
+ENDOTHERMIC REACTION:
+  - Heat is ABSORBED from the surroundings.
+  - Temperature of surroundings DECREASES.
+  - Energy of products > energy of reactants.
+  - Delta H is POSITIVE (+).
+  - Examples: photosynthesis, thermal decomposition (e.g. CaCO3 -> CaO + CO2),
+    dissolving ammonium nitrate in water.
+
+MEMORY AID:
+  "EX-othermic" = heat EXits the system
+  "EN-dothermic" = heat enters INto the system
+
+--------------------------------------------------------------------------------
+SECTION 2: BOND ENERGIES
+--------------------------------------------------------------------------------
+
+GOLDEN RULES:
+  - Bond BREAKING is ENDOTHERMIC (energy is absorbed/required).
+  - Bond MAKING is EXOTHERMIC (energy is released).
+
+Think of magnets: pulling them apart requires energy (breaking). Letting them
+snap together releases energy (making).
+
+To determine if a reaction is exothermic or endothermic:
+  - If energy released (making bonds) > energy absorbed (breaking bonds):
+    EXOTHERMIC (net release of energy).
+  - If energy absorbed (breaking bonds) > energy released (making bonds):
+    ENDOTHERMIC (net absorption of energy).
+
+--------------------------------------------------------------------------------
+SECTION 3: ENERGY LEVEL DIAGRAMS
+--------------------------------------------------------------------------------
+
+EXOTHERMIC DIAGRAM:
+  - Reactants are HIGHER on the energy axis than products.
+  - Energy "drops" from reactants to products (released).
+  - Delta H arrow points DOWNWARD from reactants to products.
+
+ENDOTHERMIC DIAGRAM:
+  - Reactants are LOWER on the energy axis than products.
+  - Energy "rises" from reactants to products (absorbed).
+  - Delta H arrow points UPWARD from reactants to products.
+
+ACTIVATION ENERGY (Ea):
+  - The minimum energy that reactant particles must have to collide and react.
+  - Shown as a "hump" from the reactant level to the peak of the curve.
+  - A catalyst lowers the activation energy, providing an alternative pathway.
+
+--------------------------------------------------------------------------------
+SECTION 4: CALORIMETRY — ENERGY TRANSFER CALCULATIONS
+--------------------------------------------------------------------------------
+
+FORMULA: q = m x c x Delta T
+
+Where:
+  q = energy transferred (J)
+  m = mass of the solution being heated (g) — assume 1 cm3 = 1 g
+  c = specific heat capacity of water (4.2 J/g/C)
+  Delta T = temperature change (T_final - T_initial) in C
+
+STEPS:
+1. Measure initial temperature of the solution.
+2. Add reactant, stir continuously.
+3. Measure the maximum (or minimum) temperature reached.
+4. Calculate Delta T = T_final - T_initial.
+5. Calculate q = m x c x Delta T.
+6. To find energy per mole: energy per mole = q / moles of limiting reactant.
+7. Remember to include the correct SIGN: exothermic = negative, endothermic
+   = positive.
+
+WORKED EXAMPLE:
+  50 cm3 of 0.200 mol/dm3 HCl is mixed with 50 cm3 of 0.200 mol/dm3 NaOH.
+  The temperature rises from 22.0C to 28.5C. Calculate the enthalpy change
+  of neutralisation per mole of water formed.
+
+Step 1: Total mass of solution
+  m = 50 + 50 = 100 g (assume 1 cm3 = 1 g)
+
+Step 2: Temperature change
+  Delta T = 28.5 - 22.0 = +6.5C (temperature rose -> exothermic)
+
+Step 3: Energy transferred
+  q = m x c x Delta T = 100 x 4.2 x 6.5 = 2730 J = 2.73 kJ
+
+Step 4: Moles of water formed
+  HCl + NaOH -> NaCl + H2O
+  Moles of HCl = 0.200 x 0.050 = 0.0100 mol
+  Moles of NaOH = 0.200 x 0.050 = 0.0100 mol
+  Mole ratio 1:1, so moles of H2O = 0.0100 mol
+
+Step 5: Energy per mole
+  Delta H = -2.73 / 0.0100 = -273 kJ/mol
+  (Negative because the reaction is exothermic.)
+
+Answer: -273 kJ/mol
+
+--------------------------------------------------------------------------------
+SECTION 5: CALORIMETRY — EXPERIMENTAL PROCEDURE
+--------------------------------------------------------------------------------
+
+PLANNING A CALORIMETRY EXPERIMENT:
+1. Measure a fixed volume of solution A (e.g. 50 cm3) using a measuring
+   cylinder. Record the initial temperature.
+2. Measure a fixed volume of solution B (e.g. 50 cm3). Record its initial
+   temperature.
+3. Pour solution B into solution A in a polystyrene cup (insulated to reduce
+   heat loss).
+4. Stir the mixture continuously and record the maximum temperature reached.
+5. Calculate Delta T = T_max - T_initial.
+6. Calculate q = m x c x Delta T (m = total mass of solution).
+7. Calculate moles of limiting reactant.
+8. Calculate Delta H = q / moles (with correct sign).
+
+CONTROLS:
+  - Same volumes of solutions each time.
+  - Same initial temperature.
+  - Same concentration of solutions.
+  - Same type of cup (polystyrene, insulated).
+  - Stirring at the same rate.
+
+IMPROVING ACCURACY:
+  - Use a polystyrene cup with a lid (reduces heat loss to surroundings).
+  - Use a digital thermometer (more precise than a mercury thermometer).
+  - Record the maximum temperature quickly before heat is lost.
+  - Plot a cooling curve: take temperature readings every 30 seconds,
+    extrapolate back to the time of mixing to find the true temperature change.
+
+COMMON SOURCES OF ERROR:
+  - Heat loss to the surroundings (largest error).
+  - Heat absorbed by the cup itself.
+  - Not all heat transferred to the solution (some heats the container).
+  - Incomplete reaction.
+  - Measurement error in temperature or volume.
+
+--------------------------------------------------------------------------------
+SECTION 6: COMMON ENERGY CHANGES MISTAKES
+--------------------------------------------------------------------------------
+
+1. Forgetting the negative sign for exothermic reactions. Delta H must be
+   negative for exothermic.
+
+2. Using the mass of one solution instead of the total mass. If 50 cm3 of
+   acid is mixed with 50 cm3 of alkali, the total mass is 100 g.
+
+3. Not converting joules to kilojoules. q = m x c x Delta T gives joules.
+   Divide by 1000 for kJ.
+
+4. Using the wrong number of moles. Use the limiting reactant (the one that
+   is fully consumed).
+
+5. Confusing bond breaking and bond making. Breaking = endothermic (+).
+   Making = exothermic (-).
+
+6. Forgetting that activation energy is present in BOTH exothermic and
+   endothermic reactions.
+
+Sources:
+- https://www.thinka.ai/en-GB/GCE-O-Level/Chemistry-6092/Chemical-Energetics
+- https://www.bbc.co.uk/bitesize/guides/zdy8jty/revision/2

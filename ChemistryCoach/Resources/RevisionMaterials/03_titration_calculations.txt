@@ -1,0 +1,200 @@
+================================================================================
+TITRATION CALCULATIONS — WORKED EXAMPLES
+Singapore GCE O-Level Chemistry (6092)
+================================================================================
+
+KEY FORMULAS:
+  moles = concentration x volume(dm3)
+  concentration = moles / volume(dm3)
+  volume(dm3) = volume(cm3) / 1000
+  titre = final burette reading - initial burette reading
+
+ALWAYS:
+  - Write the balanced equation first.
+  - Convert cm3 to dm3 by dividing by 1000.
+  - Use the mole ratio from the balanced equation.
+  - Carry units through every step.
+
+BURETTE TECHNIQUE:
+  - Record readings to 2 decimal places (nearest 0.05 cm3).
+  - Concordant titres are within 0.20 cm3 of each other (SEAB guidance).
+  - Average only the concordant titres. Discard anomalous results.
+  - Rinse the burette with the solution it will contain (not water).
+
+================================================================================
+EXAMPLE 1: Finding concentration of NaOH (1:1 ratio)
+================================================================================
+
+Question:
+  25.0 cm3 of NaOH solution was neutralised by 22.4 cm3 of 0.100 mol/dm3 HCl.
+  Find the concentration of NaOH.
+
+Step 1: Equation
+  HCl + NaOH -> NaCl + H2O
+
+Step 2: Moles of HCl (the known solution)
+  Volume of HCl = 22.4 cm3 = 22.4/1000 = 0.0224 dm3
+  Moles of HCl = 0.100 x 0.0224 = 0.00224 mol
+
+Step 3: Mole ratio
+  HCl : NaOH = 1 : 1
+  Moles of NaOH = 0.00224 mol
+
+Step 4: Concentration of NaOH
+  Volume of NaOH = 25.0 cm3 = 0.0250 dm3
+  Concentration = 0.00224 / 0.0250 = 0.0896 mol/dm3
+
+Answer: 0.0896 mol/dm3
+
+================================================================================
+EXAMPLE 2: Sulfuric acid titration (1:2 ratio) + concordance
+================================================================================
+
+Question:
+  A student titrates H2SO4 against 25.0 cm3 of 0.200 mol/dm3 NaOH.
+  Titration results: 18.60, 18.55, 18.90, 18.50 cm3.
+  Find the concentration of H2SO4.
+
+Step 1: Identify concordant titres
+  18.60, 18.55, and 18.50 are within 0.20 cm3 of each other.
+  18.90 is anomalous — discard it.
+
+Step 2: Mean titre
+  Mean = (18.60 + 18.55 + 18.50) / 3 = 55.65 / 3 = 18.55 cm3
+
+Step 3: Equation
+  H2SO4 + 2NaOH -> Na2SO4 + 2H2O
+
+Step 4: Moles of NaOH
+  Volume = 25.0 cm3 = 0.0250 dm3
+  Moles of NaOH = 0.200 x 0.0250 = 0.00500 mol
+
+Step 5: Mole ratio
+  H2SO4 : NaOH = 1 : 2
+  Moles of H2SO4 = 0.00500 / 2 = 0.00250 mol
+
+Step 6: Concentration of H2SO4
+  Volume = 18.55 cm3 = 0.01855 dm3
+  Concentration = 0.00250 / 0.01855 = 0.135 mol/dm3
+
+Answer: 0.135 mol/dm3
+
+================================================================================
+EXAMPLE 3: Finding volume of acid required (2:1 ratio)
+================================================================================
+
+Question:
+  Calculate the volume of 0.250 mol/dm3 HNO3 required to react completely
+  with 40.0 cm3 of 0.150 mol/dm3 Ca(OH)2.
+
+Step 1: Equation
+  2HNO3 + Ca(OH)2 -> Ca(NO3)2 + 2H2O
+
+Step 2: Moles of Ca(OH)2
+  Volume = 40.0 cm3 = 0.0400 dm3
+  Moles of Ca(OH)2 = 0.150 x 0.0400 = 0.00600 mol
+
+Step 3: Mole ratio
+  HNO3 : Ca(OH)2 = 2 : 1
+  Moles of HNO3 = 2 x 0.00600 = 0.0120 mol
+
+Step 4: Volume of HNO3
+  Volume = moles / concentration = 0.0120 / 0.250 = 0.0480 dm3
+  Volume = 0.0480 x 1000 = 48.0 cm3
+
+Answer: 48.0 cm3
+
+================================================================================
+EXAMPLE 4: Finding mass of salt formed
+================================================================================
+
+Question:
+  25.0 cm3 of 0.500 mol/dm3 NaOH reacts with excess HCl.
+  Calculate the mass of NaCl formed.
+  (Mr: Na = 23, Cl = 35.5)
+
+Step 1: Equation
+  HCl + NaOH -> NaCl + H2O
+
+Step 2: Moles of NaOH
+  Volume = 25.0 cm3 = 0.0250 dm3
+  Moles = 0.500 x 0.0250 = 0.0125 mol
+
+Step 3: Mole ratio
+  NaOH : NaCl = 1 : 1
+  Moles of NaCl = 0.0125 mol
+
+Step 4: Mass of NaCl
+  Mr of NaCl = 23 + 35.5 = 58.5
+  Mass = moles x Mr = 0.0125 x 58.5 = 0.731 g
+
+Answer: 0.731 g
+
+================================================================================
+EXAMPLE 5: Multi-step — titre to mass of solid
+================================================================================
+
+Question:
+  In a titration, 23.50 cm3 of 0.105 mol/dm3 H2SO4 neutralised 25.0 cm3 of
+  NaOH. Calculate the mass of Na2SO4 that could be obtained from 500 cm3
+  of this NaOH solution.
+  (Mr: Na = 23, S = 32, O = 16)
+
+Step 1: Equation
+  H2SO4 + 2NaOH -> Na2SO4 + 2H2O
+
+Step 2: Moles of H2SO4
+  Volume = 23.50 cm3 = 0.02350 dm3
+  Moles of H2SO4 = 0.105 x 0.02350 = 0.002468 mol
+
+Step 3: Mole ratio -> moles of NaOH in 25.0 cm3
+  H2SO4 : NaOH = 1 : 2
+  Moles of NaOH in 25.0 cm3 = 2 x 0.002468 = 0.004935 mol
+
+Step 4: Concentration of NaOH
+  Concentration = 0.004935 / 0.0250 = 0.1974 mol/dm3
+
+Step 5: Moles of NaOH in 500 cm3
+  Volume = 500 cm3 = 0.500 dm3
+  Moles = 0.1974 x 0.500 = 0.0987 mol
+
+Step 6: Mole ratio -> moles of Na2SO4
+  NaOH : Na2SO4 = 2 : 1
+  Moles of Na2SO4 = 0.0987 / 2 = 0.04935 mol
+
+Step 7: Mass of Na2SO4
+  Mr of Na2SO4 = (2 x 23) + 32 + (4 x 16) = 46 + 32 + 64 = 142
+  Mass = 0.04935 x 142 = 7.01 g
+
+Answer: 7.01 g
+
+================================================================================
+TITRATION TECHNIQUE — COMMON ERRORS
+================================================================================
+
+1. Not rinsing the burette with the solution it will contain. Residual water
+   dilutes the solution, giving a larger titre and a lower calculated
+   concentration.
+
+2. Reading the burette from above or below eye level (parallax error).
+   Read at eye level, using the bottom of the meniscus.
+
+3. Including a rough (trial) titre in the average. Only average concordant
+   titres.
+
+4. Forgetting to convert cm3 to dm3 (or dividing by 1000).
+
+5. Using the wrong mole ratio. Always write the balanced equation first.
+
+6. Not swirling the conical flask during titration. Uneven mixing means the
+   endpoint may appear earlier or later than the true equivalence point.
+
+7. Adding titrant too quickly near the endpoint. Add dropwise near the
+   colour change.
+
+8. Using Universal Indicator for a titration. Use methyl orange or
+   phenolphthalein — they have a sharp colour change at the endpoint.
+
+Sources:
+- https://www.savemyexams.com/o-level/chemistry/cie/23/revision-notes/3-stoichiometry/3-3-the-mole-and-the-avogadro-constant/titration-calculations/
+- https://primayscience.org/secondary-science/pure-sciences/chemistry/practical-skills/

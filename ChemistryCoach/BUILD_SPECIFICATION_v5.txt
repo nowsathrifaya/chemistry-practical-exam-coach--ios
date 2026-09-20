@@ -1,0 +1,28 @@
+Chemistry Practical Exam Coach — Build v5
+=========================================
+
+Goal: adaptive mastery and exam-readiness build on top of v4.
+
+Implemented:
+1. AdaptiveCoach engine converts persistent Attempt history into targeted next actions.
+2. Today's Focus card added to Home and Progress.
+3. Recommendations route directly to QA, calculations, ACE topic/skill, simulations,
+   apparatus and graph practice.
+4. Advanced QA, water-of-crystallisation and salt-preparation simulations now record
+   completed results into SwiftData attempt history.
+5. Fixed the water-of-crystallisation mass-of-water calculation bug.
+6. Replaced the minimal orphaned MockPracticalView with a dedicated 5-question,
+   10-mark Paper 3-style practical mock and persistent result recording.
+7. ACE Leitner state remains persisted with UserDefaults per curriculum; no unnecessary
+   SwiftData migration was introduced.
+8. Version updated to 1.2.0 (build 3).
+
+Design principle:
+Attempt -> detect weak area -> recommend focused practice -> retest.
+
+Known next improvements:
+- Per-question QA subskill analytics and targeted chloride/cation retests.
+- Calculation practice self-marking and attempt recording.
+- Graph Coach/Apparatus Trainer content expansion.
+- Haptics/sound integration for new advanced simulations.
+- Optional migration of Leitner state to SwiftData if cross-device sync becomes required.

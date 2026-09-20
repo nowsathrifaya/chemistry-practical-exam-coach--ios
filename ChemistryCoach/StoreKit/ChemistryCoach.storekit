@@ -1,0 +1,16 @@
+{
+  "identifier" : "com.chemistrycoach.storekit",
+  "products" : [
+    {
+      "displayPrice" : "4.99",
+      "familyShareable" : true,
+      "internalID" : "all-experiments",
+      "locale" : "en_SG",
+      "productID" : "com.chemistrycoach.all-experiments",
+      "referenceName" : "All Experiments",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : { "_appStoreVersion" : "1.0", "_applicationInternalID" : "chemistrycoach" },
+  "version" : 1
+}

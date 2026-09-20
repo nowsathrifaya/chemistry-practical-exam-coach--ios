@@ -1,0 +1,165 @@
+================================================================================
+SEPARATION TECHNIQUES — COMPLETE REFERENCE
+Singapore GCE O-Level Chemistry (6092)
+================================================================================
+
+The choice of separation method depends on the physical properties of the
+substances in the mixture — usually differences in solubility, boiling point,
+density, or sublimability.
+
+--------------------------------------------------------------------------------
+SECTION 1: METHODS OVERVIEW
+--------------------------------------------------------------------------------
+
+METHOD              | SEPARATES                       | KEY PRINCIPLE
+--------------------+---------------------------------+--------------------------
+Filtration          | Insoluble solid from liquid     | Particle size (filter
+                    |                                 | paper pores)
+Crystallisation     | Dissolved solid from solution   | Solubility (hot vs cold)
+Evaporation to      | Dissolved solid from solution   | Solubility (solid does
+dryness             | (non-decomposing solid)         | not decompose on heating)
+Simple distillation | Liquid from solution (solvent   | Boiling point
+                    | from solute)                    |
+Fractional          | Miscible liquids with different | Boiling point (close
+distillation        | boiling points                  | together)
+Separating funnel   | Immiscible liquids              | Density
+Sublimation         | Sublimable solid from mixture   | Sublimation
+Paper chromatography| Dissolved solids (dyes, inks)  | Solubility in solvent
+Centrifugation      | Insoluble solid from liquid     | Density (spinning)
+
+--------------------------------------------------------------------------------
+SECTION 2: DETAILED DESCRIPTIONS
+--------------------------------------------------------------------------------
+
+1. FILTRATION
+   - Used to separate an insoluble solid from a liquid (e.g. sand from water).
+   - Pour mixture through filter paper in a funnel.
+   - RESIDUE = solid left on the filter paper.
+   - FILTRATE = liquid that passes through.
+   - Can also use centrifugation for very fine solids.
+
+2. CRYSTALLISATION
+   - Used to separate a dissolved solid from a solution when the solid is
+     more soluble in hot solvent than cold.
+   - Heat the solution to evaporate some solvent (concentration).
+   - Test for saturation: dip a clean cold glass rod; if crystals form on
+     removal, the solution is saturated.
+   - Allow to cool slowly. Crystals form as solubility decreases.
+   - Filter crystals, wash with cold water, dry between filter paper.
+   - Use when the solid might decompose on strong heating.
+
+3. EVAPORATION TO DRYNESS
+   - Used when the solid does NOT decompose on heating (e.g. NaCl).
+   - Heat the solution until all solvent is evaporated.
+   - The solid remains as a dry powder.
+   - NOT suitable for salts that decompose (e.g. CuSO4, FeSO4).
+
+4. SIMPLE DISTILLATION
+   - Used to separate a pure liquid from a solution (e.g. pure water from
+     saltwater).
+   - Solution is heated; the liquid with the lowest boiling point vaporises.
+   - Vapour passes through a condenser (cold water jacket), condenses back
+     to liquid, and is collected.
+   - The solid solute remains in the flask.
+   - The thermometer measures the boiling point of the distillate.
+
+5. FRACTIONAL DISTILLATION
+   - Used to separate two or more miscible liquids with different boiling
+     points (e.g. ethanol and water).
+   - A fractionating column is used (with glass beads or plates) to provide
+     multiple condensation-evaporation cycles.
+   - The liquid with the lowest boiling point distils off first.
+   - Example: ethanol (bp 78C) distils before water (bp 100C).
+   - Stop heating when the temperature starts rising above 78C.
+   - Used industrially: fractional distillation of crude oil.
+
+6. SEPARATING FUNNEL
+   - Used to separate immiscible liquids (e.g. oil and water).
+   - Pour mixture into a separating funnel.
+   - Allow layers to form (denser liquid sinks to the bottom).
+   - Open the tap to drain the lower layer, then close before the interface.
+   - The upper layer can be poured out from the top.
+
+7. SUBLIMATION
+   - Used when one substance sublimes (turns directly from solid to gas).
+   - Heat the mixture. The sublimable solid turns to gas, leaving the other
+     substance behind.
+   - The gas can be cooled and collected on a cold surface.
+   - Sublimable solids: iodine, naphthalene, ammonium chloride, dry ice.
+
+8. PAPER CHROMATOGRAPHY
+   - Used to separate dissolved substances (e.g. dyes in food colouring, inks).
+   - Draw a pencil line (baseline) near the bottom of chromatography paper.
+   - Place a small spot of the mixture on the baseline.
+   - Suspend the paper in a solvent (e.g. water, ethanol) so that the solvent
+     level is BELOW the baseline.
+   - The solvent rises up the paper by capillary action.
+   - Different substances travel different distances based on their solubility
+     in the solvent.
+   - Remove the paper when the solvent front nears the top. Mark the solvent
+     front.
+   - Calculate Rf value: Rf = distance travelled by substance / distance
+     travelled by solvent front.
+   - Compare Rf values with known standards to identify substances.
+
+   Rf value is a constant for a given substance under fixed conditions
+   (same solvent, same temperature). Rf ranges from 0 to 1.
+
+--------------------------------------------------------------------------------
+SECTION 3: CHOOSING THE RIGHT METHOD — DECISION GUIDE
+--------------------------------------------------------------------------------
+
+What are you separating?
+  - Solid + liquid (insoluble solid):
+    -> Filtration or centrifugation
+
+  - Solid + liquid (dissolved solid):
+    -> If solid decomposes on heating: CRYSTALLISATION
+    -> If solid does NOT decompose: EVAPORATION TO DRYNESS
+
+  - Two miscible liquids (different boiling points):
+    -> If boiling points are far apart: SIMPLE DISTILLATION
+    -> If boiling points are close together: FRACTIONAL DISTILLATION
+
+  - Two immiscible liquids:
+    -> SEPARATING FUNNEL
+
+  - Solid that sublimes + solid that does not:
+    -> SUBLIMATION
+
+  - Mixture of dissolved dyes/substances:
+    -> PAPER CHROMATOGRAPHY
+
+  - Mixture of solids with different solubilities:
+    -> Dissolve in a suitable solvent, then filter/crystallise.
+
+--------------------------------------------------------------------------------
+SECTION 4: COMMON MISTAKES
+--------------------------------------------------------------------------------
+
+1. Using evaporation to dryness for a salt that decomposes. Copper(II)
+   sulfate turns from blue to white to black if overheated. Use
+   crystallisation instead.
+
+2. Using simple distillation when fractional distillation is needed. If two
+   miscible liquids have close boiling points, simple distillation will not
+   separate them effectively.
+
+3. Drawing the baseline in pen instead of pencil. Pen ink will dissolve in
+   the solvent and interfere with the chromatography.
+
+4. Placing the solvent level above the baseline in chromatography. The spots
+   will dissolve into the solvent instead of travelling up the paper.
+
+5. Not marking the solvent front before it evaporates. You need the solvent
+   front distance to calculate Rf values.
+
+6. Forgetting to wash crystals after filtration. Impurities remain on the
+   surface. Wash with a small amount of COLD solvent.
+
+7. Not recording the boiling point during distillation. The thermometer
+   reading confirms the identity and purity of the distillate.
+
+Sources:
+- https://www.savemyexams.com/o-level/chemistry/cie/23/revision-notes/12-experimental-techniques-and-chemical-analysis/12-4-separation-and-purification/separation-and-purification-techniques/
+- https://www.makingsense-sg.com/download/o-level-ip-chemistry-separation-techniques-summary/

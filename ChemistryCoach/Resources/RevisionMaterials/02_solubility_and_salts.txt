@@ -1,0 +1,189 @@
+================================================================================
+SOLUBILITY RULES AND SALT PREPARATION — COMPLETE REFERENCE
+Singapore GCE O-Level Chemistry (6092)
+================================================================================
+
+--------------------------------------------------------------------------------
+SECTION 1: SOLUBILITY RULES TABLE
+--------------------------------------------------------------------------------
+
+SALT TYPE         | SOLUBILITY      | INSOLUBLE EXCEPTIONS
+------------------+-----------------+------------------------------------------
+Group I salts     | ALL soluble     | None
+(Li+, Na+, K+)    |                 |
+Ammonium (NH4+)   | ALL soluble     | None
+Nitrates (NO3-)   | ALL soluble     | None
+Chlorides (Cl-)   | Most soluble    | AgCl, PbCl2
+Bromides (Br-)    | Most soluble    | AgBr, PbBr2
+Iodides (I-)      | Most soluble    | AgI, PbI2
+Sulfates (SO4 2-) | Most soluble    | BaSO4, PbSO4, CaSO4 (slightly)
+Carbonates (CO3 2-)| Mostly insoluble| Soluble if Group I or NH4+
+Hydroxides (OH-)  | Mostly insoluble| Soluble if Group I, Ba(OH)2, Ca(OH)2 (slightly)
+Oxides (O 2-)     | Mostly insoluble| Soluble if Group I or NH4+
+Phosphates (PO4 3-)| Mostly insoluble| Soluble if Group I or NH4+
+Sulfides (S 2-)   | Mostly insoluble| Soluble if Group I, Group II, NH4+
+
+MEMORY AIDS:
+- "SPA" salts (Sodium, Potassium, Ammonium) are ALWAYS soluble — no exceptions.
+- All NITRATES are soluble — no exceptions.
+- Chlorides: exceptions are Silver and Lead ("Smart Learners" = S, L).
+- Sulfates: exceptions are Barium, Calcium, Lead ("Big Cats Like milk" = B, C, L).
+- Most carbonates and hydroxides are insoluble except SPA + calcium hydroxide.
+
+--------------------------------------------------------------------------------
+SECTION 2: SALT PREPARATION — CHOOSING THE METHOD
+--------------------------------------------------------------------------------
+
+DECISION TREE:
+1. Is the salt SOLUBLE?
+   - NO  -> Use PRECIPITATION (Method A)
+   - YES -> Continue to step 2
+
+2. Is the salt an SPA salt (Sodium, Potassium, or Ammonium)?
+   - YES -> Use TITRATION (Method C)
+   - NO  -> Use EXCESS INSOLUBLE BASE (Method B)
+
+--------------------------------------------------------------------------------
+SECTION 3: METHOD A — PRECIPITATION (for insoluble salts)
+--------------------------------------------------------------------------------
+
+Use this when the salt is insoluble in water (e.g. lead(II) sulfate, barium
+sulfate, silver chloride, calcium carbonate).
+
+PRINCIPLE: Mix two soluble solutions — one containing the cation, the other
+containing the anion. The insoluble salt precipitates out.
+
+EXAMPLE: Prepare lead(II) sulfate, PbSO4
+- Mix lead(II) nitrate solution + sodium sulfate solution
+- Pb2+(aq) + SO4 2-(aq) -> PbSO4(s)
+
+STEPS:
+1. Mix two soluble solutions together (one with the cation, one with the anion).
+2. A solid (precipitate) forms immediately.
+3. Filter the mixture to collect the solid residue.
+4. Wash the residue with a little distilled water to remove impurities.
+5. Dry the salt between sheets of filter paper.
+
+NOTE: The other ions (e.g. Na+ and NO3-) remain in solution (the filtrate)
+because their salts are soluble. They do not interfere.
+
+--------------------------------------------------------------------------------
+SECTION 4: METHOD B — EXCESS INSOLUBLE BASE (for soluble non-SPA salts)
+--------------------------------------------------------------------------------
+
+Use this for soluble salts that are NOT SPA salts (e.g. copper(II) sulfate,
+magnesium chloride, zinc nitrate).
+
+PRINCIPLE: React an acid with an EXCESS of an insoluble solid (metal, metal
+oxide, metal hydroxide, or metal carbonate). The excess is removed by
+filtration. Using excess ensures all the acid is used up (no acid contaminates
+the salt).
+
+EXAMPLE: Prepare copper(II) sulfate from sulfuric acid + copper(II) oxide
+- H2SO4(aq) + CuO(s) -> CuSO4(aq) + H2O(l)
+
+STEPS:
+1. Add the insoluble solid (e.g. CuO) to the acid in a beaker.
+2. Stir and keep adding until no more solid dissolves (excess).
+   - This ensures all the acid has reacted.
+3. Filter to remove the unreacted solid (residue).
+   - The filtrate contains the salt solution.
+4. Heat the filtrate to evaporate some water (concentration).
+   - Test for saturation: dip a clean cold glass rod into the solution;
+     if crystals form on the rod, it is saturated.
+5. Allow the saturated solution to cool slowly so crystals form.
+6. Filter the crystals, wash with a small amount of cold distilled water,
+   and dry between sheets of filter paper.
+
+WHY EXCESS? Because both reactants and the product are soluble, we cannot
+separate excess reactant by filtration. Using an INSOLUBLE solid means the
+excess can be filtered off. The acid is fully consumed.
+
+NOTE: For metals, use moderately reactive metals (e.g. zinc, magnesium).
+Do NOT use very reactive metals (e.g. sodium, potassium) — dangerous.
+Do NOT use unreactive metals (e.g. copper, silver) — no reaction with dilute
+acid (copper does not react with dilute HCl).
+
+EVAPORATION vs CRYSTALLISATION:
+- Evaporation to dryness: heat until all water is gone. Use only if the
+  salt does NOT decompose on heating (e.g. NaCl).
+- Crystallisation: heat to concentrate, then cool. Use if the salt MAY
+  decompose on strong heating (e.g. CuSO4, FeSO4). This is the safer method.
+
+--------------------------------------------------------------------------------
+SECTION 5: METHOD C — TITRATION (for soluble SPA salts)
+--------------------------------------------------------------------------------
+
+Use this for soluble Sodium, Potassium, or Ammonium salts (e.g. NaCl, KNO3,
+NH4Cl). Both reactants AND the product are all soluble, so the excess method
+cannot be used. Titration allows exact stoichiometric amounts with no excess.
+
+EXAMPLE: Prepare sodium chloride from HCl + NaOH
+- HCl(aq) + NaOH(aq) -> NaCl(aq) + H2O(l)
+
+STEPS:
+1. Use a pipette to measure a fixed volume (e.g. 25.0 cm3) of alkali into
+   a conical flask.
+2. Add 2-3 drops of indicator (e.g. methyl orange).
+3. Fill a burette with the acid.
+4. Add acid from the burette while swirling the flask, until the indicator
+   changes colour permanently (endpoint).
+5. Record the volume of acid used (titre = final - initial burette reading).
+6. REPEAT the titration without indicator, using the exact volumes found.
+   - The indicator is removed so it does not contaminate the pure salt.
+7. Evaporate the solution to obtain the salt.
+   - For NaCl: evaporate to dryness (NaCl does not decompose).
+
+WHY TITRATION? Because both reactants are soluble, you cannot add excess and
+filter it off. You need exact volumes so there is no unreacted acid or alkali
+left in the product.
+
+--------------------------------------------------------------------------------
+SECTION 6: TYPES OF ACID REACTIONS FOR SALT MAKING
+--------------------------------------------------------------------------------
+
+Acid + Metal      -> Salt + Hydrogen gas
+  e.g. H2SO4 + Zn  -> ZnSO4 + H2
+  (Use moderately reactive metals: Zn, Mg, Fe. Not Cu, Ag, Au. Not Na, K.)
+
+Acid + Base (insoluble oxide/hydroxide) -> Salt + Water
+  e.g. 2HCl + CuO -> CuCl2 + H2O
+  e.g. H2SO4 + CuO -> CuSO4 + H2O
+
+Acid + Carbonate  -> Salt + Water + Carbon dioxide
+  e.g. 2HCl + Na2CO3 -> 2NaCl + H2O + CO2
+  e.g. H2SO4 + CuCO3 -> CuSO4 + H2O + CO2
+
+Acid + Alkali (soluble base) -> Salt + Water (neutralisation)
+  e.g. HCl + NaOH -> NaCl + H2O
+  e.g. H2SO4 + 2NaOH -> Na2SO4 + 2H2O
+
+--------------------------------------------------------------------------------
+SECTION 7: COMMON ERRORS IN SALT PREPARATION
+--------------------------------------------------------------------------------
+
+1. Using the excess method for an SPA salt. If both reactants are soluble,
+   you cannot filter off excess. You MUST use titration.
+
+2. Forgetting to remove the indicator in the titration method. The indicator
+   contaminates the salt. Repeat without indicator.
+
+3. Evaporating to dryness when the salt decomposes on heating. Copper(II)
+   sulfate and iron(II) sulfate should be crystallised, not evaporated to
+   dryness.
+
+4. Using a very reactive metal (Na, K) with acid — dangerous and impractical.
+
+5. Using copper metal with dilute HCl — no reaction (copper is below hydrogen
+   in the reactivity series).
+
+6. Not washing crystals. Wash with a small amount of COLD distilled water
+   to remove soluble impurities without dissolving too much product.
+
+7. Washing with a large amount of hot water — this dissolves and loses the
+   product. Use a small amount of cold water.
+
+Sources:
+- https://chemnotcheem.com/preparation-of-salts/
+- https://www.thinka.ai/en-SG/GCE-O-Level/Chemistry-6092/Salts
+- https://www.achieversdream.com.sg/salt-preparation-cheat-sheet-and-guide-o-level-jc/

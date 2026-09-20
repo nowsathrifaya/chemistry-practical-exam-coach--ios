@@ -1,0 +1,332 @@
+================================================================================
+STUDY NOTES — TOPIC-BY-TOPIC EXPANSION
+Singapore GCE O-Level Chemistry (6092)
+================================================================================
+
+These notes expand the 12 topics of the 6092 syllabus, focusing on the
+practical-relevant aspects most likely to appear in Paper 3.
+
+================================================================================
+TOPIC 1: EXPERIMENTAL DESIGN
+================================================================================
+
+- Scientific method: observe, hypothesise, test, conclude.
+- Variables: independent (what you change), dependent (what you measure),
+  controlled (what you keep constant).
+- Fair test: only one variable changed at a time; all others controlled.
+- Accuracy: how close to the true value.
+- Precision: how close repeated measurements are to each other.
+- Reliability: reproducibility of results (repeat and average).
+- Anomalies: outliers that do not fit the pattern; discard and identify.
+
+Paper 3 technique standards:
+- Burette readings to 0.05 cm3 (2 decimal places).
+- QA aliquots: 1-2 cm3 of solution; add reagents slowly.
+- Significant figures: match the least precise measurement.
+- Tables: independent variable in left column; dependent in right.
+- Graphs: label axes with quantity and units; choose a scale that uses
+  more than half the grid; plot points as small crosses or dots.
+
+================================================================================
+TOPIC 2: SEPARATION TECHNIQUES
+================================================================================
+
+(See file 08_separation_techniques.txt for full details.)
+
+Key points:
+- Filtration: insoluble solid + liquid.
+- Crystallisation: dissolved solid from solution (solid may decompose).
+- Evaporation to dryness: dissolved solid (does NOT decompose).
+- Simple distillation: liquid from solution.
+- Fractional distillation: miscible liquids (close boiling points).
+- Separating funnel: immiscible liquids.
+- Sublimation: sublimable solid from non-sublimable.
+- Chromatography: dissolved dyes; Rf = distance substance / distance solvent.
+
+================================================================================
+TOPIC 3: ACIDS, BASES AND SALTS
+================================================================================
+
+ACIDS: substances that produce H+ ions in water. pH < 7. Turn blue litmus red.
+  - Strong acids: fully ionise (HCl, HNO3, H2SO4).
+  - Weak acids: partially ionise (ethanoic acid, carbonic acid).
+
+BASES: substances that neutralise acids. Metal oxides and hydroxides.
+  - Alkalis: bases that dissolve in water, producing OH- ions. pH > 7.
+    Turn red litmus blue. Examples: NaOH, KOH, NH3(aq).
+  - Strong alkalis: fully ionise (NaOH, KOH).
+  - Weak alkalis: partially ionise (NH3).
+
+NEUTRALISATION: acid + base -> salt + water.
+  H+ + OH- -> H2O
+
+pH SCALE: 0-14. pH 7 = neutral. pH < 7 = acidic. pH > 7 = alkaline.
+  Measured with Universal Indicator or pH meter.
+
+SALT PREPARATION: (See file 02_solubility_and_salts.txt)
+  - Insoluble salt -> Precipitation
+  - Soluble SPA salt -> Titration
+  - Other soluble salt -> Excess insoluble base method
+
+================================================================================
+TOPIC 4: OXIDATION AND REDUCTION
+================================================================================
+
+OXIDATION: gain of oxygen, OR loss of hydrogen, OR loss of electrons.
+REDUCTION: loss of oxygen, OR gain of hydrogen, OR gain of electrons.
+
+OIL RIG: Oxidation Is Loss, Reduction Is Gain (of electrons).
+
+REDOX REACTIONS: both oxidation and reduction occur simultaneously.
+  - The substance oxidised = reducing agent.
+  - The substance reduced = oxidising agent.
+
+REACTIVITY SERIES (most to least reactive):
+  K, Na, Ca, Mg, Al, Zn, Fe, [H], Cu, Ag, Au
+
+Metals above H react with dilute acids to produce H2.
+Metals below H do NOT react with dilute acids.
+
+Metal displacement: a more reactive metal displaces a less reactive metal
+from its compound.
+  e.g. Zn + CuSO4 -> ZnSO4 + Cu (zinc displaces copper)
+  e.g. Fe + CuSO4 -> FeSO4 + Cu (iron displaces copper)
+
+RUSTING: iron + oxygen + water -> hydrated iron(III) oxide.
+  Prevention: painting, oiling, galvanising (zinc coating), sacrificial
+  protection (attach a more reactive metal like Mg).
+
+================================================================================
+TOPIC 5: GASES IN THE ATMOSPHERE
+================================================================================
+
+Composition of air: N2 (78%), O2 (21%), Ar (0.9%), CO2 (0.04%).
+Fractional distillation of liquid air separates these by boiling point.
+
+TESTS FOR GASES (see file 01_qualitative_analysis.txt):
+  H2: pop with lighted splint.
+  O2: relights glowing splint.
+  CO2: turns limewater milky.
+  NH3: pungent; turns damp red litmus blue.
+  Cl2: greenish-yellow; bleaches damp blue litmus.
+  SO2: turns acidified KMnO4 from purple to colourless.
+
+CARBON CYCLE: photosynthesis (removes CO2), respiration (adds CO2),
+  combustion (adds CO2), decomposition (adds CO2).
+
+GLOBAL WARMING: increased CO2 from burning fossil fuels enhances the
+  greenhouse effect. Consequences: rising temperatures, melting ice caps,
+  rising sea levels, climate change.
+
+PREVENTING GLOBAL WARMING: reduce fossil fuel use, use renewable energy,
+  plant trees, carbon capture.
+
+================================================================================
+TOPIC 6: ATOMIC STRUCTURE AND STOICHIOMETRY
+================================================================================
+
+ATOM: nucleus (protons +, neutrons neutral) + electron shells (electrons -).
+  Proton number (Z) = number of protons = number of electrons (in neutral atom).
+  Nucleon number (A) = protons + neutrons.
+  Isotopes: same protons, different neutrons (e.g. Cl-35 and Cl-37).
+
+ELECTRON CONFIGURATION (first 20 elements):
+  K shell: max 2 electrons
+  L shell: max 8 electrons
+  M shell: max 8 electrons (for first 20)
+  e.g. Na (11): 2.8.1
+  e.g. Cl (17): 2.8.7
+  e.g. Ar (18): 2.8.8
+
+IONS: atoms gain/lose electrons to achieve a full outer shell.
+  Metal atoms LOSE electrons -> positive ions (cations).
+  Non-metal atoms GAIN electrons -> negative ions (anions).
+
+MOLE CONCEPT:
+  1 mole = 6.02 x 10^23 particles (Avogadro's number).
+  Moles = mass / Mr.
+  Moles = concentration x volume(dm3).
+  Moles of gas = volume(dm3) / 24 (at room temperature and pressure).
+  1 mole of any gas occupies 24 dm3 at rtp.
+
+EMPIRICAL FORMULA: simplest whole number ratio of atoms in a compound.
+  1. Find moles of each element (mass / Ar).
+  2. Divide by the smallest.
+  3. Find the simplest ratio.
+
+MOLECULAR FORMULA: actual number of atoms in a molecule.
+  = empirical formula x n, where n = Mr(empirical) / Mr(molecular).
+
+================================================================================
+TOPIC 7: CHEMICAL BONDING
+================================================================================
+
+IONIC BONDING: transfer of electrons from metal to non-metal. Electrostatic
+  attraction between oppositely charged ions. Forms giant ionic lattice.
+  Properties: high melting/boiling point, soluble in water, conducts
+  electricity when molten or in solution (ions free to move), brittle.
+  Examples: NaCl, MgO, CaCl2.
+
+COVALENT BONDING: sharing of electron pairs between non-metal atoms.
+  Simple molecular: low melting/boiling point, poor conductors.
+    Examples: H2O, CO2, NH3, CH4, Cl2.
+  Macromolecular (giant covalent): very high melting point.
+    Examples: diamond (each C bonded to 4 others), graphite (layers, conducts
+    electricity, soft/slippery), silicon dioxide (SiO2).
+
+METALLIC BONDING: positive metal ions in a "sea" of delocalised electrons.
+  Properties: good conductors (free electrons), malleable and ductile,
+  high melting point (varies).
+
+INTERMOLECULAR FORCES:
+  - Van der Waals (weakest): between simple molecules.
+  - Hydrogen bonding (stronger): between H and O/N/F in different molecules.
+  - Ionic/electrostatic (strongest): in ionic lattices.
+
+================================================================================
+TOPIC 8: CHEMICAL ENERGETICS
+================================================================================
+
+(See file 05_energy_changes.txt for full details.)
+
+Key points:
+- Exothermic: heat released, Delta H negative, surroundings get hotter.
+- Endothermic: heat absorbed, Delta H positive, surroundings get colder.
+- Bond breaking = endothermic. Bond making = exothermic.
+- Calorimetry: q = m x c x Delta T.
+- Fuel cells: convert chemical energy to electrical energy. Hydrogen fuel
+  cell: H2 + O2 -> H2O, produces electricity and water.
+
+================================================================================
+TOPIC 9: CHEMICAL REACTIONS
+================================================================================
+
+TYPES OF REACTION:
+  - Combination: A + B -> C (e.g. 2Mg + O2 -> 2MgO)
+  - Decomposition: C -> A + B (e.g. CaCO3 -> CaO + CO2)
+  - Displacement: A + BC -> AC + B (e.g. Zn + CuSO4 -> ZnSO4 + Cu)
+  - Neutralisation: acid + base -> salt + water
+  - Combustion: substance + O2 -> oxides (+ energy)
+  - Precipitation: two solutions -> insoluble solid + solution
+
+RATE OF REACTION (see file 06_rate_of_reaction.txt):
+  - Factors: temperature, concentration, surface area, catalyst.
+  - Collision theory: effective collisions need sufficient energy and
+    correct orientation.
+  - Catalyst: provides alternative pathway with lower activation energy.
+    Not consumed. Remains chemically unchanged.
+  - Examples: MnO2 catalyses decomposition of H2O2. Iron catalyses Haber
+    process. Vanadium(V) oxide catalyses Contact process.
+
+REVERSIBLE REACTIONS:
+  - Can go in both directions (forward and backward).
+  - Dynamic equilibrium: rate of forward = rate of backward; concentrations
+    constant.
+  - Le Chatelier's principle: if conditions change, equilibrium shifts to
+    oppose the change.
+
+HABER PROCESS (industrial):
+  N2 + 3H2 ⇌ 2NH3 (exothermic)
+  Conditions: 200 atm, 450C, iron catalyst.
+  Compromise: high pressure favours forward (fewer moles of gas); high
+  temperature favours backward (exothermic). 450C is a compromise between
+  rate and yield.
+
+CONTACT PROCESS (industrial):
+  2SO2 + O2 ⇌ 2SO3 (exothermic)
+  Conditions: 2 atm, 450C, V2O5 catalyst.
+  SO3 then dissolved in conc. H2SO4 to form oleum (H2S2O7), then diluted.
+
+================================================================================
+TOPIC 10: ELECTROLYSIS
+================================================================================
+
+(See file 04_electrolysis.txt for full details.)
+
+Key points:
+- Cathode (-): reduction. Cations attracted. Metal or H2 discharged.
+- Anode (+): oxidation. Anions attracted. Halide or O2 discharged.
+- Molten: only ions from the compound. Straightforward prediction.
+- Aqueous: H+ and OH- from water compete.
+  Cathode: metal below H -> metal discharged. Metal above H -> H2.
+  Anode: concentrated halide -> halogen. Otherwise -> O2 from OH-.
+- Half-equations: balance atoms, then charge with electrons.
+- Applications: electroplating, extraction of aluminium, purification of
+  copper.
+
+ELECTROPLATING:
+  - Object to be plated = cathode.
+  - Plating metal = anode.
+  - Electrolyte = salt of plating metal (e.g. AgNO3 for silver plating).
+  - Metal ions deposit on cathode object.
+
+PURIFICATION OF COPPER:
+  - Impure copper = anode.
+  - Pure copper = cathode.
+  - Electrolyte = CuSO4 solution.
+  - Cu dissolves from anode, deposits on cathode. Impurities fall as "anode
+    sludge."
+
+================================================================================
+TOPIC 11: ORGANIC CHEMISTRY
+================================================================================
+
+ALKANES (CnH2n+2): saturated (single bonds only). Unreactive. Combustible.
+  e.g. CH4 (methane), C2H6 (ethane), C3H8 (propane).
+  Combustion: CH4 + 2O2 -> CO2 + 2H2O.
+
+ALKENES (CnH2n): unsaturated (contain C=C double bond). More reactive.
+  e.g. C2H4 (ethene), C3H6 (propene).
+  Test for unsaturation: decolourises bromine water (orange -> colourless).
+  Addition reactions: H2, Br2, H2O add across the double bond.
+
+ALCOHOLS (CnH2n+1OH): functional group -OH.
+  e.g. CH3OH (methanol), C2H5OH (ethanol).
+  Ethanol: produced by fermentation (glucose -> ethanol + CO2, yeast, 37C).
+  Combustion: C2H5OH + 3O2 -> 2CO2 + 3H2O.
+  Oxidation: ethanol -> ethanoic acid (using acidified KMnO4).
+
+CARBOXYLIC ACIDS (CnH2n+1COOH): functional group -COOH.
+  e.g. HCOOH (methanoic acid), CH3COOH (ethanoic acid).
+  Weak acids. React with metals, bases, carbonates (like other acids).
+  Ethanoic acid + ethanol -> ethyl ethanoate + water (esterification, with
+  conc. H2SO4 catalyst).
+
+MACROMOLECULES:
+  - Polythene: addition polymer from ethene. (n CH2=CH2 -> -(CH2-CH2)n-)
+  - Nylon: condensation polymer. Formed from a diamine and a dicarboxylic
+    acid. Water eliminated.
+  - Proteins: natural condensation polymers of amino acids. Peptide bonds.
+
+NATURAL MACROMOLECULES:
+  - Proteins: made of amino acids. Essential for growth and repair.
+  - Starch: polymer of glucose. Energy storage in plants.
+  - Cellulose: polymer of glucose. Structural in plant cell walls.
+
+================================================================================
+TOPIC 12: PERIODIC TABLE
+================================================================================
+
+GROUP I (Alkali Metals): Li, Na, K. Very reactive (1 electron in outer shell).
+  React with water: 2Na + 2H2O -> 2NaOH + H2. Reactivity increases down group.
+  Soft, low density, stored under oil (to prevent reaction with air/moisture).
+
+GROUP VII (Halogens): F, Cl, Br, I. 7 electrons in outer shell. Diatomic (Cl2).
+  Reactivity decreases down group (F most reactive).
+  Displacement: more reactive halogen displaces less reactive from its salt.
+    e.g. Cl2 + 2KBr -> 2KCl + Br2 (chlorine displaces bromine).
+  Colours: Cl2 = pale green, Br2 = red-brown, I2 = purple/black solid.
+
+GROUP 0 (Noble Gases): He, Ne, Ar, Kr. Full outer shell. Unreactive (inert).
+  Used in lighting (neon signs), argon in light bulbs, helium in balloons.
+
+TRANSITION ELEMENTS: between Groups II and III. Form coloured compounds
+  (e.g. Cu2+ = blue, Fe2+ = green, Fe3+ = brown). Often used as catalysts
+  (Fe in Haber process, Ni in hydrogenation, V2O5 in Contact process).
+  Have variable oxidation states (e.g. Fe2+ and Fe3+).
+
+Sources:
+- https://ethantuition.com/wp-content/uploads/2024/07/chemistry-2024.pdf (SEAB 6092 syllabus)
+- https://www.thinka.ai/en-GB/GCE-O-Level/Chemistry-6092/Chemical-Energetics
+- https://chemnotcheem.com/preparation-of-salts/
+- https://eclatinstitute.sg/blog/o-level-chemistry-experiments/O-Level-Chemistry-Practical-2025-Guide
