@@ -226,7 +226,7 @@ enum SaltPrepBank {
 }
 
 struct SaltPreparationView: View {
-    let curriculum: Curriculum = .general
+    let curriculum: Curriculum
     @StateObject private var model = SaltPrepViewModel()
     @Environment(\.modelContext) private var modelContext
     @State private var didRecordResult = false

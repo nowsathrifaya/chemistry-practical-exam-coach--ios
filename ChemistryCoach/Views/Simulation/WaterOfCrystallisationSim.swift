@@ -195,7 +195,7 @@ final class WaterOfCrystallisationViewModel: ObservableObject {
 }
 
 struct WaterOfCrystallisationView: View {
-    let curriculum: Curriculum = .general
+    let curriculum: Curriculum
     @StateObject private var model = WaterOfCrystallisationViewModel()
     @Environment(\.modelContext) private var modelContext
     @State private var didRecordResult = false
