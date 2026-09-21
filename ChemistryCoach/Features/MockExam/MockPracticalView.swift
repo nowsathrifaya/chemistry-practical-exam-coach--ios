@@ -237,7 +237,7 @@ struct MockPracticalView: View {
         didRecord = true
         AttemptRepository(modelContext: modelContext).save(
             curriculum: curriculum,
-            mode: .simulationLab,
+            mode: AttemptMode.simulationLab,
             target: "Practical Mock · Paper 3",
             score: total,
             maxScore: totalMarks,

@@ -370,7 +370,7 @@ struct WaterOfCrystallisationView: View {
             guard newValue != nil, !didRecordResult else { return }
             didRecordResult = true
             let repository = AttemptRepository(modelContext: modelContext)
-            repository.save(curriculum: curriculum, mode: .simulationLab, target: "Water of Crystallisation · \(model.saltName)", score: model.result?.score ?? 0, maxScore: 100, feedback: model.result?.feedback ?? [])
+            repository.save(curriculum: curriculum, mode: AttemptMode.simulationLab, target: "Water of Crystallisation · \(model.saltName)", score: model.result?.score ?? 0, maxScore: 100, feedback: model.result?.feedback ?? [])
         }
         .onChange(of: model.saltName) { _, newValue in
             if newValue.isEmpty { didRecordResult = false }

@@ -98,7 +98,7 @@ struct CalculationPracticeView: View {
 
         AttemptRepository(modelContext: modelContext).save(
             curriculum: curriculum,
-            mode: .calculationPractice,
+            mode: AttemptMode.calculationPractice,
             target: "Calculation Practice · \(item.topic)",
             score: correct ? 1 : 0,
             maxScore: 1,

@@ -37,7 +37,7 @@ struct PracticalReadinessCard: View {
                     .foregroundStyle(.secondary)
             }
 
-            ForEach(readiness.skills) { item in
+            ForEach(readiness.skills, id: \.id) { item in
                 HStack(spacing: 10) {
                     Text(item.skill.shortLabel)
                         .font(.caption.weight(.bold))

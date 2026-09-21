@@ -324,7 +324,7 @@ struct QualitativeAnalysisLabView: View {
             didRecordResult = true
             let ion = [sample.cation, sample.anion, sample.gas].compactMap { $0 }.joined(separator: " + ")
             let repository = AttemptRepository(modelContext: modelContext)
-            repository.save(curriculum: curriculum, mode: .simulationLab, target: "Qualitative Analysis · \(ion.isEmpty ? sample.id.uppercased() : ion)", score: model.result?.score ?? 0, maxScore: 100, feedback: model.result?.feedback ?? [])
+            repository.save(curriculum: curriculum, mode: AttemptMode.simulationLab, target: "Qualitative Analysis · \(ion.isEmpty ? sample.id.uppercased() : ion)", score: model.result?.score ?? 0, maxScore: 100, feedback: model.result?.feedback ?? [])
         }
         .onChange(of: model.step) { _, newStep in
             if newStep == .selectSample { didRecordResult = false }

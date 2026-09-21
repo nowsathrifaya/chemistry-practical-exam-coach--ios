@@ -129,7 +129,7 @@ final class AceViewModel {
 
         repository.save(
             curriculum: activeCurriculum,
-            mode: .acePractice,
+            mode: AttemptMode.acePractice,
             target: "\(q.skillArea.label): \(q.topic.label)",
             score: correct ? q.marks : 0,
             maxScore: q.marks,

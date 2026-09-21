@@ -1,6 +1,6 @@
 import Foundation
 
-enum CurriculumSkill: String, CaseIterable, Identifiable { case safety, apparatus, measurement, observation, recording, graphing, calculation, planning, evaluation, qualitativeAnalysis
+enum CurriculumSkill: String, CaseIterable, Identifiable, Hashable { case safety, apparatus, measurement, observation, recording, graphing, calculation, planning, evaluation, qualitativeAnalysis
  var id: String { rawValue }
 }
 struct CurriculumTopic: Identifiable, Hashable { let id: String; let title: String; let skills: [CurriculumSkill]; let notes: String }

@@ -109,7 +109,7 @@ final class GraphCoachPracticeViewModel {
         result = outcome
         SoundManager.shared.play(outcome.correct ? .success : .error)
         repository.save(
-            curriculum: curriculum, mode: .graphCoach, target: graphType.label,
+            curriculum: curriculum, mode: AttemptMode.graphCoach, target: graphType.label,
             score: outcome.score, maxScore: 100, feedback: outcome.feedback
         )
         onSaved()

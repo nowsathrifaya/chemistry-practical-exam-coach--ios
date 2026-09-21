@@ -273,7 +273,7 @@ struct SaltPreparationView: View {
             guard newValue != nil, !didRecordResult, let salt = model.selectedSalt else { return }
             didRecordResult = true
             let repository = AttemptRepository(modelContext: modelContext)
-            repository.save(curriculum: curriculum, mode: .simulationLab, target: "Salt Preparation · \(salt.name)", score: model.result?.score ?? 0, maxScore: 100, feedback: model.result?.feedback ?? [])
+            repository.save(curriculum: curriculum, mode: AttemptMode.simulationLab, target: "Salt Preparation · \(salt.name)", score: model.result?.score ?? 0, maxScore: 100, feedback: model.result?.feedback ?? [])
         }
         .onChange(of: model.step) { _, newStep in
             if newStep == .selectSalt { didRecordResult = false }

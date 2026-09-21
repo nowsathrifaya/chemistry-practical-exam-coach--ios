@@ -42,7 +42,7 @@ struct ApparatusPracticeView: View {
                         let r=ApparatusTrainer().mark(question:question,studentReading:v)
                         result=r
                         SoundManager.shared.play(r.correct ? .success : .error)
-                        repository.save(curriculum:curriculum,mode:.apparatusPractice,target:apparatusType.label,score:r.score,maxScore:100,feedback:r.feedback); onSaved?()
+                        repository.save(curriculum:curriculum,mode:AttemptMode.apparatusPractice,target:apparatusType.label,score:r.score,maxScore:100,feedback:r.feedback); onSaved?()
                     } else {
                         SoundManager.shared.play(.tap)
                         question=ApparatusTrainer().question(type:apparatusType,seed:Int.random(in:0...Int(Int32.max)),curriculum:curriculum); input=""; result=nil
