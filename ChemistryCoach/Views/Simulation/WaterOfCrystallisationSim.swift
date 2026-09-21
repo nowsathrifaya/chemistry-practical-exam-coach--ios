@@ -104,13 +104,14 @@ final class WaterOfCrystallisationViewModel: ObservableObject {
 
     var canDeclareConstant: Bool { heatingCount >= 2 && !constantMass }
 
-    /// The student's own decision that mass is no longer changing. If they're right, the
-    /// experiment moves on; if they're wrong, the app does not let them proceed — it tells
-    /// them to continue heating, exactly like a real balance would keep showing a falling mass.
+    /// The student's own decision that mass is no longer changing. Either way the experiment
+    /// moves on to the calculation step — if they're wrong, they just get a warning (and a
+    /// scoring penalty) instead of being blocked, since real students do make this call
+    /// themselves and should see the consequence of an early call rather than get stuck.
     func declareConstantMass() {
         guard canDeclareConstant else { return }
+        constantMass = true
         if isActuallyConstantNow {
-            constantMass = true
             lastDeclareWasPremature = false
         } else {
             prematureDeclarations += 1
@@ -297,21 +298,21 @@ struct WaterOfCrystallisationView: View {
                                 .buttonStyle(.bordered)
                         }
 
-                        if model.constantMass {
+                        if model.constantMass && model.lastDeclareWasPremature {
+                            HStack(alignment: .top) {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .foregroundStyle(.orange)
+                                Text("Careful — the mass was still falling between your last two readings, so this call was premature. You can continue to the calculation, but not all the water may have been driven off, which will affect your result.")
+                                    .font(.caption)
+                                    .foregroundStyle(.orange)
+                            }
+                        } else if model.constantMass {
                             HStack {
                                 Image(systemName: "checkmark.circle.fill")
                                     .foregroundStyle(.green)
                                 Text("Constant mass reached — the last two weighings agree, so all water has been driven off")
                                     .font(.caption)
                                     .foregroundStyle(.green)
-                            }
-                        } else if model.lastDeclareWasPremature {
-                            HStack {
-                                Image(systemName: "exclamationmark.triangle.fill")
-                                    .foregroundStyle(.orange)
-                                Text("Not yet — the mass is still falling between readings. Continue heating.")
-                                    .font(.caption)
-                                    .foregroundStyle(.orange)
                             }
                         } else if model.heatingCount > 0 {
                             Text("Weigh, then decide for yourself whether the mass has stopped changing.")

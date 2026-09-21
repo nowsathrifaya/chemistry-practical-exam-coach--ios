@@ -113,6 +113,7 @@ enum AttemptMode: String, Codable {
     case graphCoach = "GRAPH_COACH"
     case acePractice = "ACE_PRACTICE"
     case simulationLab = "SIMULATION_LAB"
+    case calculationPractice = "CALCULATION_PRACTICE"
 }
 
 struct CommonMistake: Identifiable, Codable, Hashable {
@@ -166,4 +167,6 @@ struct GraphGradientResult {
     let studentGradient: Double?
     let feedback: [String]
     let explanation: String
+    var skillMarks: [PracticalSkillMark] = []
+    var mistakes: [PracticalMistake] = []
 }

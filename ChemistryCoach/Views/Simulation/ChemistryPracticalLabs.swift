@@ -31,6 +31,11 @@ struct RateReading: Identifiable, Hashable {
     let volume: Double
 }
 
+enum SeparationMixture: String, CaseIterable {
+    case saltAndSand = "Sand and salt dissolved in water"
+    case immiscibleLiquids = "Two immiscible liquids (oil and water)"
+}
+
 @MainActor
 final class ChemistryLabViewModel: ObservableObject {
     let type: SimulationType
@@ -66,6 +71,8 @@ final class ChemistryLabViewModel: ObservableObject {
     @Published var titrationLastOutcome: String?
     @Published var titrationConcentrationInput: String = ""
     @Published var titrationHCl_M: Double = 0.100
+    /// Set when the student chooses to move on despite non-concordant titres.
+    @Published var titrationProceedAnyway: Bool = false
     @Published var rateConcentration: Double = 0.5
     @Published var rateTemperature: Double = 0.5
     @Published var rateSurfaceArea: Double = 0.5
@@ -81,12 +88,27 @@ final class ChemistryLabViewModel: ObservableObject {
     @Published var reagentDispensed = false
     @Published var qualitativeObservation = ""
     @Published var qualitativeStep = 0
-    @Published var separationStep = 0
-    @Published var separationCollected = ""
-    @Published var solubilityStep = 0
-    @Published var solubilityDissolvedMass: Double = 10.0
+    // Separation techniques realism state (Section 8)
+    @Published var separationMixtureType: SeparationMixture = .saltAndSand
+    @Published var filterPrepared: Bool = false
+    @Published var pourRate: Double = 0.4
+    @Published var filtered: Bool = false
+    @Published var pouredTooFast: Bool = false
+    @Published var evaporationChoice: String = ""
+    @Published var crystalsObtained: Bool = false
+    @Published var funnelDraining: Bool = false
+    @Published var funnelDrainedAmount: Double = 0
+    @Published var funnelOutcome: String?
+    @Published var distillateReady: Bool = false
+    // Solubility / crystallisation realism state (Section 9): the student decides when the
+    // solution is saturated from what they observe, rather than a hidden "correct stage".
+    @Published var solubilityAddedMass: Double = 0
+    @Published var solubilityLastPortionDissolved: Bool = true
+    @Published var solubilityDeclaredSaturated: Bool = false
+    @Published var solubilityPrematureDeclarations: Int = 0
+    @Published var solubilityExcessPortions: Int = 0
+    @Published var solubilityFilteredExcess: Bool = false
     @Published var solubilityCoolingTemp: Double = 20.0
-    @Published var solubilityFiltered = false
     @Published var chromatographySolventFront: Double = 0
     // Chromatography realism state (Section 7). chromatographySolventFront is the distance
     // (cm) the solvent has risen ABOVE the baseline — matching the renderer's coordinate system.
@@ -113,7 +135,6 @@ final class ChemistryLabViewModel: ObservableObject {
     private var timerTask: Task<Void, Never>?
     private var target = 0.0
     private var qualitativeExpected = ""
-    private var separationExpected = ""
 
     init(type: SimulationType, curriculum: Curriculum, repository: AttemptRepository) {
         self.type = type; self.curriculum = curriculum
@@ -131,15 +152,23 @@ final class ChemistryLabViewModel: ObservableObject {
         case .electrolysis: return "Fill the beaker with electrolyte, immerse two inert electrodes without touching them, connect the positive and negative terminals, then switch on the supply. Observe bubbles or deposits at each electrode and test the products safely."
         case .chromatography: return "Draw a pencil baseline, place a small sample spot on the paper, stand the paper in shallow solvent below the baseline, and cover the container. Let the solvent rise, remove the paper before the solvent reaches the top, mark the solvent front and measure from the baseline."
         case .energetics: return "Measure the starting temperature, then mix the reactants in an insulated cup and stir continuously. Watch the temperature — it will keep changing, then plateau, then very slowly drift back to room temperature if you wait too long. Decide for yourself when it has peaked (or bottomed out) and record it. Then calculate ΔT = final − initial."
-        case .separation: return "Identify the physical properties first. Transfer the mixture to the correct apparatus, carry out one separation at a time, label each fraction, and check that the wanted substance has been recovered without contamination."
-        case .solubility: return "Add a known mass of solute to hot water and stir until dissolved. Concentrate without evaporating to dryness, allow the hot saturated solution to cool slowly, filter the crystals, wash with a little cold solvent and dry before weighing."
+        case .separation: return "Look at the mixture, choose the correct apparatus, and operate it yourself: fold and wet the filter paper (or open the separating-funnel tap) and judge each step by what you actually see happening, not by picking a method name from a list."
+        case .solubility: return "Add solid in small portions, stirring after each one. Stop as soon as you see a trace of solid that will not dissolve even after prolonged stirring — that is saturation. Filter off the excess, then cool to crystallise."
         }
     }
 
     var currentStage: Int {
         switch type {
-        case .solubility: return min(solubilityStep, type.practicalStages.count - 1)
-        case .separation: return min(separationStep, type.practicalStages.count - 1)
+        case .solubility:
+            let progress = (solubilityDeclaredSaturated ? 2 : 0) + (solubilityFilteredExcess ? 1 : 0) + (solubilityAddedMass > 0 && !solubilityDeclaredSaturated ? 1 : 0)
+            return min(progress, type.practicalStages.count - 1)
+        case .separation:
+            let progress: Int
+            switch separationMixtureType {
+            case .saltAndSand: progress = (filterPrepared ? 1 : 0) + (filtered ? 1 : 0) + (crystalsObtained ? 1 : 0)
+            case .immiscibleLiquids: progress = (funnelOutcome != nil ? 2 : 0) + (distillateReady ? 1 : 0)
+            }
+            return min(progress, type.practicalStages.count - 1)
         case .titration: return min(stageFromState, type.practicalStages.count - 1)
         default: return min(stageFromState, type.practicalStages.count - 1)
         }
@@ -204,9 +233,17 @@ final class ChemistryLabViewModel: ObservableObject {
         case .energetics:
             if energeticsStarted { recordEnergeticsTemperature() } else { startEnergeticsReaction() }
         case .separation:
-            separationStep = min(2, separationStep + 1); actionState = separationStep >= 2 ? .measured : .reacting
+            switch separationMixtureType {
+            case .saltAndSand:
+                if !filterPrepared { prepareFilter() }
+                else if !filtered { pourMixtureThroughFilter() }
+                else if evaporationChoice.isEmpty { chooseEvaporation("Until saturated, then cool") }
+            case .immiscibleLiquids:
+                if funnelOutcome == nil { funnelDraining ? closeFunnelTap() : openFunnelTap() }
+                else if !distillateReady { distillCollectedLiquid() }
+            }
         case .solubility:
-            solubilityStep = min(3, solubilityStep + 1); reactionProgress = Double(solubilityStep + 1) / 4.0; actionState = solubilityStep >= 3 ? .measured : .reacting
+            if !solubilityDeclaredSaturated { addSolidPortion() } else if !solubilityFilteredExcess { filterExcessSolid() }
         }
     }
 
@@ -229,10 +266,14 @@ final class ChemistryLabViewModel: ObservableObject {
         case .titration: return false // titration uses its own dedicated attempt/finalize controls, not the generic Record button
         case .qualitativeAnalysis: return actionState != .idle && !qualitativeReagent.isEmpty && !qualitativeObservation.isEmpty
         case .electrolysis: return electrolysisHasSwitchedOn && !electrolysisCathode.isEmpty && !electrolysisAnode.isEmpty && !electrolysisCathodeEquation.trimmingCharacters(in: .whitespaces).isEmpty && !electrolysisAnodeEquation.trimmingCharacters(in: .whitespaces).isEmpty
-        case .separation: return !choice.isEmpty && separationStep >= 2 && !separationCollected.isEmpty
+        case .separation:
+            switch separationMixtureType {
+            case .saltAndSand: return crystalsObtained
+            case .immiscibleLiquids: return distillateReady
+            }
         case .rateReaction: return false // driven by recordGasReading()/stopRateExperiment(), not the generic Record button
         case .chromatography: return chromatographyRemoved && !input.trimmingCharacters(in: .whitespaces).isEmpty
-        case .solubility: return !input.trimmingCharacters(in: .whitespaces).isEmpty
+        case .solubility: return solubilityFilteredExcess && !input.trimmingCharacters(in: .whitespaces).isEmpty
         case .energetics: return energeticsRecordedTemp != nil && !input.trimmingCharacters(in: .whitespaces).isEmpty
         }
     }
@@ -245,8 +286,8 @@ final class ChemistryLabViewModel: ObservableObject {
         case .electrolysis: return "Current: \(String(format: "%.1f", 0.5 + control * 2.5)) A"
         case .chromatography: return chromatographyRemoved ? "Solvent front: \(String(format: "%.1f", chromatographySolventFront)) cm from baseline" : "Place the baseline, then start the solvent rising"
         case .energetics: return "Temperature: \(String(format: "%.1f", energeticsFinalTemp)) °C · ΔT \(String(format: "%+.1f", energeticsFinalTemp - energeticsInitialTemp)) °C"
-        case .separation: return "Plan: \(choice.isEmpty ? "not selected" : choice)"
-        case .solubility: return "Stage \(solubilityStep + 1)/4 · Cooling: \(Int(solubilityCoolingTemp)) °C"
+        case .separation: return "Mixture: \(separationMixtureType.rawValue)"
+        case .solubility: return solubilityDeclaredSaturated ? "Saturated at \(String(format: "%.1f", solubilityAddedMass)) g added" : "Added so far: \(String(format: "%.1f", solubilityAddedMass)) g"
         }
     }
 
@@ -449,6 +490,117 @@ final class ChemistryLabViewModel: ObservableObject {
         observedChanges.append("\(outcome). Solvent front marked \(String(format: "%.1f", chromatographySolventFront)) cm above the baseline.")
     }
 
+    // MARK: - Separation techniques: real apparatus operation (Section 8)
+
+    /// Filtration path (sand + salt dissolved in water): fold and wet the paper, then pour.
+    func prepareFilter() {
+        guard type == .separation, separationMixtureType == .saltAndSand, !filterPrepared else { return }
+        filterPrepared = true
+        observedChanges.append("Filter paper folded into a cone, wetted, and seated in the funnel.")
+    }
+
+    /// Pouring too fast overflows the filter paper and lets solid escape into the filtrate.
+    func pourMixtureThroughFilter() {
+        guard type == .separation, filterPrepared, !filtered else { return }
+        filtered = true
+        if pourRate > 0.7 {
+            pouredTooFast = true
+            observedChanges.append("Poured too quickly — the level rose above the rim of the filter paper and some sand escaped into the filtrate.")
+        } else {
+            observedChanges.append("Residue (sand) remains in the filter paper; filtrate (salt solution) collects in the beaker below.")
+        }
+    }
+
+    /// The classic real mistake: evaporating a filtrate fully to dryness instead of stopping
+    /// at saturation and letting it cool to crystallise.
+    func chooseEvaporation(_ choice: String) {
+        guard type == .separation, filtered, evaporationChoice.isEmpty else { return }
+        evaporationChoice = choice
+        crystalsObtained = true
+        if choice == "Until saturated, then cool" {
+            observedChanges.append("Crystals form as the saturated solution cools — a good yield of well-formed crystals.")
+        } else {
+            observedChanges.append("Evaporating to dryness caused spitting and produced small, poor-quality crystals fused to the dish.")
+        }
+    }
+
+    /// Separating-funnel path: the denser liquid drains from the bottom tap. The student must
+    /// close the tap right at the interface — too early wastes yield, too late mixes the layers.
+    func openFunnelTap() {
+        guard type == .separation, separationMixtureType == .immiscibleLiquids, funnelOutcome == nil, !funnelDraining else { return }
+        funnelDraining = true
+        actionState = .reacting
+        timerTask?.cancel()
+        timerTask = Task { @MainActor [weak self] in
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .milliseconds(150))
+                guard let self, self.funnelDraining, self.result == nil else { return }
+                self.funnelDrainedAmount = min(1.4, self.funnelDrainedAmount + 0.05)
+            }
+        }
+    }
+
+    func closeFunnelTap() {
+        guard type == .separation, funnelDraining else { return }
+        funnelDraining = false
+        timerTask?.cancel(); timerTask = nil
+        actionState = .observing
+        let outcome: String
+        if funnelDrainedAmount < 0.85 {
+            outcome = "Closed too early — some of the lower layer was left behind"
+        } else if funnelDrainedAmount <= 1.08 {
+            outcome = "Closed at the interface — clean separation"
+        } else {
+            outcome = "Closed too late — the layers mixed together"
+        }
+        funnelOutcome = outcome
+        observedChanges.append(outcome)
+    }
+
+    func distillCollectedLiquid() {
+        guard type == .separation, funnelOutcome != nil, !distillateReady else { return }
+        distillateReady = true
+        observedChanges.append("Heated the collected liquid; it boiled at a constant temperature and the distillate was collected past the condenser.")
+    }
+
+    // MARK: - Solubility: saturation is a judgement call, not a fixed stage (Section 9)
+
+    /// Adds one small portion of solid, stirs it in, and reports whether it fully dissolved.
+    /// The student must read this observation themselves to decide whether to add more.
+    func addSolidPortion() {
+        guard type == .solubility, !solubilityDeclaredSaturated, result == nil else { return }
+        solubilityAddedMass += 1.0
+        let dissolvedFully = solubilityAddedMass <= target
+        solubilityLastPortionDissolved = dissolvedFully
+        if !dissolvedFully { solubilityExcessPortions += 1 }
+        observedChanges.append(dissolvedFully ? "Portion dissolved completely on stirring." : "A little solid remains undissolved even after prolonged stirring.")
+    }
+
+    /// The student's decision: "I've seen a trace of undissolved solid — this is saturated."
+    func declareSaturated() {
+        guard type == .solubility, !solubilityDeclaredSaturated, result == nil else { return }
+        if solubilityLastPortionDissolved {
+            solubilityPrematureDeclarations += 1
+            observedChanges.append("Declared saturated while everything was still dissolving — add more solid and check again.")
+        } else {
+            solubilityDeclaredSaturated = true
+            observedChanges.append("Saturation reached: \(String(format: "%.1f", solubilityAddedMass)) g added, a trace of solid remains undissolved.")
+        }
+    }
+
+    func filterExcessSolid() {
+        guard type == .solubility, solubilityDeclaredSaturated, !solubilityFilteredExcess else { return }
+        solubilityFilteredExcess = true
+        observedChanges.append("Excess undissolved solid filtered off, leaving a clear saturated filtrate.")
+    }
+
+    /// Cooling further lowers solubility, so more crystals come out of solution — a simple
+    /// physically-motivated model relating the true saturation mass to the cooling temperature.
+    var solubilityExpectedYield: Double {
+        let coolingFactor = max(0.3, min(0.9, (90.0 - solubilityCoolingTemp) / 90.0))
+        return (target * coolingFactor * 10).rounded() / 10
+    }
+
     // MARK: - Titration: continuous burette flow (Section 2)
 
     /// Signed distance in cm³ from the true (hidden) endpoint. Negative = before, positive = past.
@@ -564,9 +716,33 @@ final class ChemistryLabViewModel: ObservableObject {
         return nil
     }
     var titrationIsConcordant: Bool { titrationConcordantPair != nil }
+
+    /// The two most recent accurate titres, whether or not they're concordant — used as a
+    /// fallback so the student isn't stuck forever if their technique never converges.
+    var titrationLastTwoAccurate: (TitrationRecord, TitrationRecord)? {
+        let accurate = titrationAccurateRecords
+        guard accurate.count >= 2 else { return nil }
+        return (accurate[accurate.count - 2], accurate[accurate.count - 1])
+    }
+    /// True once there are at least two accurate titres to work with, even if they don't
+    /// yet agree — this is what unlocks the "proceed anyway" option.
+    var titrationCanProceedWithoutConcordance: Bool { !titrationIsConcordant && titrationLastTwoAccurate != nil && !titrationTapOpen }
+
+    /// The student's own decision to move on despite non-concordant titres. Like the
+    /// water-of-crystallisation "declare constant mass" call, this doesn't block progress —
+    /// it just carries a scoring penalty and a warning, since the app already told them their
+    /// titres don't agree.
+    @discardableResult
+    func proceedWithoutConcordantTitres() -> Bool {
+        guard titrationCanProceedWithoutConcordance else { return false }
+        titrationProceedAnyway = true
+        return true
+    }
+
     var titrationMeanConcordantTitre: Double? {
-        guard let pair = titrationConcordantPair else { return nil }
-        return (pair.0.titre + pair.1.titre) / 2
+        if let pair = titrationConcordantPair { return (pair.0.titre + pair.1.titre) / 2 }
+        if titrationProceedAnyway, let pair = titrationLastTwoAccurate { return (pair.0.titre + pair.1.titre) / 2 }
+        return nil
     }
     var titrationExpectedConcentration: Double? {
         guard let mean = titrationMeanConcordantTitre, mean > 0 else { return nil }
@@ -574,7 +750,7 @@ final class ChemistryLabViewModel: ObservableObject {
         let molesHCl = titrationHCl_M * 25.0 / 1000
         return molesHCl / (mean / 1000)
     }
-    var titrationCanFinalize: Bool { titrationIsConcordant && !titrationTapOpen }
+    var titrationCanFinalize: Bool { titrationMeanConcordantTitre != nil && !titrationTapOpen }
 
     /// Completes the titration: checks the student's concentration calculation,
     /// builds a per-skill mark breakdown, and records the attempt.
@@ -592,18 +768,26 @@ final class ChemistryLabViewModel: ObservableObject {
         if !overshoots.isEmpty { mistakes.append(PracticalMistake(title: "Overshot the endpoint \(overshoots.count) time(s)", consequence: "Adding titrant too quickly near the colour change gives a titre that is too high, which increases the calculated concentration.")) }
         if !earlyStops.isEmpty { mistakes.append(PracticalMistake(title: "Stopped before the colour became permanent \(earlyStops.count) time(s)", consequence: "Stopping too early gives a titre that is too low, which decreases the calculated concentration.")) }
         if !didRoughFirst { mistakes.append(PracticalMistake(title: "Skipped the rough titration", consequence: "Without a rough titre to estimate the endpoint, it is easy to overshoot on the first accurate run.")) }
+        let usedConcordantPair = titrationConcordantPair
+        if usedConcordantPair == nil, let pair = titrationLastTwoAccurate {
+            let diff = abs(pair.0.titre - pair.1.titre)
+            mistakes.append(PracticalMistake(title: "Proceeded without concordant titres", consequence: "Your two most recent accurate titres differed by \(String(format: "%.2f", diff)) cm³ — more than the 0.10 cm³ required for concordance — so the mean used for the calculation is less reliable than it should be."))
+        }
 
         let endpointSkill = overshoots.isEmpty && earlyStops.isEmpty ? 10 : max(4, 10 - (overshoots.count + earlyStops.count) * 2)
         let apparatusSkill = didRoughFirst ? 10 : 6
-        let concordanceSkill = 10
+        let concordanceSkill = usedConcordantPair != nil ? 10 : 3
         let measurementSkill = 8
         let calcSkill = calcCorrect ? 10 : (studentValue == nil ? 0 : 4)
         let totalOutOf = 50
         let totalScored = endpointSkill + apparatusSkill + concordanceSkill + measurementSkill + calcSkill
         let percentScore = Int((Double(totalScored) / Double(totalOutOf)) * 100)
 
+        let pairForFeedback = usedConcordantPair ?? titrationLastTwoAccurate
         var feedback: [String] = [
-            "Concordant titres: \(String(format: "%.2f", titrationConcordantPair?.0.titre ?? 0)) cm³ and \(String(format: "%.2f", titrationConcordantPair?.1.titre ?? 0)) cm³ (within 0.10 cm³).",
+            usedConcordantPair != nil
+                ? "Concordant titres: \(String(format: "%.2f", pairForFeedback?.0.titre ?? 0)) cm³ and \(String(format: "%.2f", pairForFeedback?.1.titre ?? 0)) cm³ (within 0.10 cm³)."
+                : "Non-concordant titres used: \(String(format: "%.2f", pairForFeedback?.0.titre ?? 0)) cm³ and \(String(format: "%.2f", pairForFeedback?.1.titre ?? 0)) cm³ (not within 0.10 cm³).",
             "Mean titre used for calculation: \(String(format: "%.2f", mean)) cm³.",
             calcCorrect ? "Your calculated concentration of \(studentValue.map { String(format: "%.3f", $0) } ?? "-") mol/dm³ matches the expected value within tolerance." : "Expected concentration ≈ \(String(format: "%.3f", expected)) mol/dm³ from moles HCl = moles NaOH at the end-point."
         ]
@@ -649,11 +833,15 @@ final class ChemistryLabViewModel: ObservableObject {
             let measuredDelta = (energeticsRecordedTemp ?? energeticsFinalTemp) - energeticsInitialTemp
             readings.append(LabReading(trialNumber: readings.count + 1, label: "ΔT (your calculation)", value: studentDelta, unit: "°C", derivedLabel: "Measured ΔT", derivedValue: measuredDelta, derivedUnit: "°C"))
         case .separation:
-            let complete = separationCorrect && separationStep >= 2 && !separationCollected.isEmpty
-            readings.append(LabReading(trialNumber: readings.count + 1, label: "Separation plan", value: complete ? 1 : 0, unit: complete ? "correct" : "review"))
+            let complete: Bool
+            switch separationMixtureType {
+            case .saltAndSand: complete = !pouredTooFast && evaporationChoice == "Until saturated, then cool"
+            case .immiscibleLiquids: complete = funnelOutcome == "Closed at the interface — clean separation"
+            }
+            readings.append(LabReading(trialNumber: readings.count + 1, label: "Separation technique", value: complete ? 1 : 0, unit: complete ? "correct" : "review"))
         case .solubility:
             let mass = Double(input.replacingOccurrences(of: ",", with: ".")) ?? 0
-            readings.append(LabReading(trialNumber: readings.count + 1, label: "Crystals recovered", value: mass, unit: "g"))
+            readings.append(LabReading(trialNumber: readings.count + 1, label: "Crystals recovered", value: mass, unit: "g", derivedLabel: "Expected yield", derivedValue: solubilityExpectedYield, derivedUnit: "g"))
         }
         let requiredTrials = (type == .electrolysis) ? 1 : targetTrials
         let shouldGrade = readings.count >= requiredTrials
@@ -661,7 +849,9 @@ final class ChemistryLabViewModel: ObservableObject {
         input = ""
         choice = ""
         electrolysisCathode = ""; electrolysisAnode = ""
-        qualitativeReagent = ""; qualitativeObservation = ""; reagentBottleOpen = false; reagentDispensed = false; qualitativeStep = 0; separationStep = 0; separationCollected = ""; solubilityStep = 0; solubilityDissolvedMass = 10.0; solubilityCoolingTemp = 20.0; solubilityFiltered = false
+        qualitativeReagent = ""; qualitativeObservation = ""; reagentBottleOpen = false; reagentDispensed = false; qualitativeStep = 0; solubilityCoolingTemp = 20.0
+        solubilityAddedMass = 0; solubilityLastPortionDissolved = true; solubilityDeclaredSaturated = false; solubilityFilteredExcess = false
+        filterPrepared = false; pourRate = 0.4; filtered = false; pouredTooFast = false; evaporationChoice = ""; crystalsObtained = false; funnelDraining = false; funnelDrainedAmount = 0; funnelOutcome = nil; distillateReady = false
         control = 0.5
         chromatographySolventFront = 0; chromatographyBaselineHeight = 1.0; chromatographyBaselineMistake = false; chromatographyStarted = false; chromatographyRemoved = false; chromatographyRemovalOutcome = nil
         energeticsMass = 100.0; energeticsInitialTemp = 20.0; energeticsFinalTemp = 25.8; energeticsStarted = false; energeticsElapsedRun = 0; energeticsRecordedTemp = nil; energeticsRecordOutcome = nil
@@ -776,12 +966,57 @@ final class ChemistryLabViewModel: ObservableObject {
             if !energeticsStirring { resultMistakes.append(PracticalMistake(title: "Did not stir continuously", consequence: "Without stirring, heat is not distributed evenly, so the thermometer reading lags behind the true temperature and the measured ΔT is unreliable.")) }
             if calcErrors > 0 { resultMistakes.append(PracticalMistake(title: "Calculated ΔT did not match the recorded temperatures", consequence: "ΔT = final temperature − initial temperature. Recheck the subtraction against your own readings.")) }
         case .separation:
-            score = separationCorrect ? 100 : 45
-            feedback = [separationCorrect ? "Your selected sequence matches the stated physical properties." : "Choose methods from particle size, solubility, boiling point and immiscibility—not from the substance names alone.", "A strong practical answer gives the operation and what is collected at each stage."]
+            switch separationMixtureType {
+            case .saltAndSand:
+                let pourSkill = pouredTooFast ? 4 : 10
+                let decisionSkill = evaporationChoice == "Until saturated, then cool" ? 10 : 3
+                score = Int((Double(pourSkill + decisionSkill) / 20.0) * 100)
+                feedback = [
+                    pouredTooFast ? "Pouring too fast let solid escape into the filtrate." : "Filtration technique was good — the filtrate came through clear.",
+                    evaporationChoice == "Until saturated, then cool" ? "Evaporating to saturation then cooling gives good, well-formed crystals." : "Evaporating fully to dryness spoils the crystals and can decompose the salt."
+                ]
+                resultSkillMarks = [
+                    PracticalSkillMark(skill: "Filtration technique", scored: pourSkill, outOf: 10),
+                    PracticalSkillMark(skill: "Crystallisation decision", scored: decisionSkill, outOf: 10)
+                ]
+                if pouredTooFast { resultMistakes.append(PracticalMistake(title: "Poured too quickly", consequence: "The mixture rose above the rim of the filter paper, letting some solid pass through into the filtrate — the residue is no longer pure.")) }
+                if evaporationChoice != "Until saturated, then cool" { resultMistakes.append(PracticalMistake(title: "Evaporated to dryness", consequence: "Taking the solution fully to dryness causes spitting and gives small, poor-quality crystals instead of large well-formed ones.")) }
+            case .immiscibleLiquids:
+                let outcome = funnelOutcome ?? "Closed too late — the layers mixed together"
+                let funnelSkill = outcome == "Closed at the interface — clean separation" ? 10 : 3
+                score = Int((Double(funnelSkill + (distillateReady ? 10 : 0)) / 20.0) * 100)
+                feedback = [
+                    outcome,
+                    "The denser liquid sits below and drains first through the tap; closing right at the interface keeps the two layers pure.",
+                    "Distillation then separates the collected liquid further by boiling point."
+                ]
+                resultSkillMarks = [
+                    PracticalSkillMark(skill: "Separating funnel timing", scored: funnelSkill, outOf: 10),
+                    PracticalSkillMark(skill: "Distillation", scored: distillateReady ? 10 : 0, outOf: 10)
+                ]
+                if outcome != "Closed at the interface — clean separation" { resultMistakes.append(PracticalMistake(title: outcome, consequence: outcome.contains("early") ? "Closing too early leaves useful product behind in the funnel, reducing yield." : "Closing too late lets both layers mix together, contaminating the sample you meant to collect.")) }
+            }
         case .solubility:
-            let vals = readings.map(\.value); let mean = vals.reduce(0,+)/Double(vals.count)
-            score = abs(mean - target) <= 1.5 ? 100 : 60
-            feedback = ["Mean recovered mass: \(String(format: "%.1f", mean)) g.", "For crystallisation, concentrate the solution without evaporating all the solvent, then cool and filter the crystals."]
+            let vals = readings.map(\.value); let mean = vals.reduce(0,+)/Double(max(vals.count, 1))
+            let expected = readings.compactMap(\.derivedValue).reduce(0,+) / Double(max(readings.count, 1))
+            let calcOK = abs(mean - expected) <= 1.0
+            let saturationGood = solubilityPrematureDeclarations == 0 && solubilityExcessPortions <= 1
+            let saturationSkill = saturationGood ? 10 : max(2, 10 - (solubilityPrematureDeclarations + max(0, solubilityExcessPortions - 1)) * 3)
+            let filterSkill = solubilityFilteredExcess ? 10 : 0
+            let calcSkill = calcOK ? 10 : 4
+            score = Int((Double(saturationSkill + filterSkill + calcSkill) / 30.0) * 100)
+            feedback = [
+                "Mean recovered mass: \(String(format: "%.1f", mean)) g against an expected \(String(format: "%.1f", expected)) g for this cooling temperature.",
+                saturationGood ? "You judged saturation well — stopping as soon as a trace of solid remained undissolved." : "Saturation judgement needs work — see the note below.",
+                "Cooling further lowers solubility, so a lower cooling temperature recovers more crystals."
+            ]
+            resultSkillMarks = [
+                PracticalSkillMark(skill: "Judging saturation", scored: saturationSkill, outOf: 10),
+                PracticalSkillMark(skill: "Filtering off excess solid", scored: filterSkill, outOf: 10),
+                PracticalSkillMark(skill: "Calculation", scored: calcSkill, outOf: 10)
+            ]
+            if solubilityPrematureDeclarations > 0 { resultMistakes.append(PracticalMistake(title: "Declared saturation before any solid remained undissolved", consequence: "Without seeing excess solid, the solution wasn't actually saturated, so the measured solubility is too low.")) }
+            if solubilityExcessPortions > 1 { resultMistakes.append(PracticalMistake(title: "Added several portions past the point of saturation", consequence: "Adding much more than needed makes the mass added an overestimate of the true solubility.")) }
         }
         let outcome = LabRunResult(correct: score >= 80, score: score, feedback: feedback, examTip: examTip, skillMarks: resultSkillMarks, mistakes: resultMistakes)
         result = outcome
@@ -791,16 +1026,18 @@ final class ChemistryLabViewModel: ObservableObject {
     func resetTask() {
         motion.reset()
         timerTask?.cancel(); timerTask = nil; startedAt = nil; elapsed = 0
-        readings = []; result = nil; actionState = .idle; observedChanges = []; reactionProgress = 0; input = ""; choice = ""; electrolysisElectrolyte = "Copper sulfate solution"; electrolysisCathode = ""; electrolysisAnode = ""; electrolysisCircuitOn = false; electrolysisCathodeEquation = ""; electrolysisAnodeEquation = ""; electrolysisHasSwitchedOn = false; qualitativeReagent = ""; qualitativeObservation = ""; reagentBottleOpen = false; reagentDispensed = false; qualitativeStep = 0; separationStep = 0; separationCollected = ""; solubilityStep = 0; solubilityDissolvedMass = 10.0; solubilityCoolingTemp = 20.0; solubilityFiltered = false; control = 0.5; energeticsMass = 100.0; energeticsInitialTemp = 20.0; energeticsFinalTemp = 25.8; energeticsStarted = false; energeticsElapsedRun = 0; energeticsRecordedTemp = nil; energeticsRecordOutcome = nil; buretteReading = 0; flaskColourProgress = 0; lastDropwise = false
+        readings = []; result = nil; actionState = .idle; observedChanges = []; reactionProgress = 0; input = ""; choice = ""; electrolysisElectrolyte = "Copper sulfate solution"; electrolysisCathode = ""; electrolysisAnode = ""; electrolysisCircuitOn = false; electrolysisCathodeEquation = ""; electrolysisAnodeEquation = ""; electrolysisHasSwitchedOn = false; qualitativeReagent = ""; qualitativeObservation = ""; reagentBottleOpen = false; reagentDispensed = false; qualitativeStep = 0; solubilityCoolingTemp = 20.0; control = 0.5; energeticsMass = 100.0; energeticsInitialTemp = 20.0; energeticsFinalTemp = 25.8; energeticsStarted = false; energeticsElapsedRun = 0; energeticsRecordedTemp = nil; energeticsRecordOutcome = nil; buretteReading = 0; flaskColourProgress = 0; lastDropwise = false
+        solubilityAddedMass = 0; solubilityLastPortionDissolved = true; solubilityDeclaredSaturated = false; solubilityFilteredExcess = false; solubilityPrematureDeclarations = 0; solubilityExcessPortions = 0
+        filterPrepared = false; pourRate = 0.4; filtered = false; pouredTooFast = false; evaporationChoice = ""; crystalsObtained = false; funnelDraining = false; funnelDrainedAmount = 0; funnelOutcome = nil; distillateReady = false
         chromatographySolventFront = 0; chromatographyBaselineHeight = 1.0; chromatographyBaselineMistake = false; chromatographyStarted = false; chromatographyRemoved = false; chromatographyRemovalOutcome = nil
-        titrationMode = .rough; titrationTapOpen = false; titrationInitialReading = 0; titrationRecords = []; titrationFlowStartedAt = nil; titrationLastOutcome = nil; titrationConcentrationInput = ""
+        titrationMode = .rough; titrationTapOpen = false; titrationInitialReading = 0; titrationRecords = []; titrationFlowStartedAt = nil; titrationLastOutcome = nil; titrationConcentrationInput = ""; titrationProceedAnyway = false
         rateConcentration = 0.5; rateTemperature = 0.5; rateSurfaceArea = 0.5; rateData = []; rateCatalystAdded = false; rateStudentReadings = []; rateTotalSubReadings = 0; rateMultipleVariablesChangedCount = 0; lastRateTrialSettings = nil
         energeticsStirring = true
         chromatographyBaselineMistakeCount = 0
         var rng = SeededRandomNumberGenerator(seed: Int.random(in: 0...Int(Int32.max)))
         target = (rng.nextDouble(23.8, 25.2) * 100).rounded() / 100
         qualitativeExpected = rng.randomElement(["chloride_obs", "hydrogen_obs", "carbonate_obs"])
-        separationExpected = rng.randomElement(["Filter → evaporate → crystallise", "Separating funnel → distil"])
+        if type == .separation { separationMixtureType = rng.nextBoolean() ? .saltAndSand : .immiscibleLiquids }
         if type == .energetics { target = rng.nextBoolean() ? 5.8 : -4.8 }
         if type == .solubility { target = rng.nextDouble(6.0, 11.0) }
         if type == .chromatography { chromatographyTrueRf = (rng.nextDouble(0.35, 0.78) * 100).rounded() / 100 }
@@ -865,8 +1102,7 @@ final class ChemistryLabViewModel: ObservableObject {
         default: return equationLooksRight(electrolysisAnodeEquation, mustContain: ["o2"])
         }
     }
-    var separationCorrect: Bool { choice == separationExpected }
-    var mixtureLabel: String { separationExpected == "Separating funnel → distil" ? "two immiscible liquids" : "sand + salt in water" }
+    var mixtureLabel: String { separationMixtureType.rawValue }
     var targetTemperatureChange: Double { target }
     var examTrap: String {
         switch type {
@@ -876,7 +1112,7 @@ final class ChemistryLabViewModel: ObservableObject {
         case .electrolysis: return "Anode = oxidation; cathode = reduction. Do not reverse the two."
         case .chromatography: return "The Rf denominator is the distance travelled by the solvent front, not the paper length."
         case .energetics: return "State the sign/direction of temperature change and connect it to the heat transfer conclusion."
-        case .separation: return "Explain why each method works using a physical property."
+        case .separation: return "State the physical property each step depends on (particle size for filtration, density for a separating funnel, boiling point for distillation)."
         case .solubility: return "Crystallisation is not simply evaporating to dryness; retain some solvent to avoid decomposing/contaminating the product."
         }
     }
@@ -986,10 +1222,24 @@ struct ChemistryPracticalLabView: View {
                             Text(r.outcome).font(.caption2).foregroundStyle(r.outcome == "Endpoint detected" ? .green : .orange)
                         }
                     }
-                    Text(model.titrationIsConcordant ? "✓ Concordant titres achieved." : "Repeat the accurate titration until two titres are within 0.10 cm³.").font(.caption).foregroundStyle(model.titrationIsConcordant ? .green : .secondary)
+                    if model.titrationIsConcordant {
+                        Text("✓ Concordant titres achieved.").font(.caption).foregroundStyle(.green)
+                    } else if model.titrationProceedAnyway {
+                        HStack(alignment: .top) {
+                            Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(.orange)
+                            Text("Proceeding without concordant titres — repeating would give a more reliable mean, but you can calculate from these two anyway.")
+                                .font(.caption).foregroundStyle(.orange)
+                        }
+                    } else {
+                        Text("Repeat the accurate titration until two titres are within 0.10 cm³.").font(.caption).foregroundStyle(.secondary)
+                        if model.titrationCanProceedWithoutConcordance {
+                            Button("Proceed without concordant titres") { model.proceedWithoutConcordantTitres() }
+                                .buttonStyle(.bordered).tint(.orange)
+                        }
+                    }
                 }
 
-                if model.titrationIsConcordant {
+                if model.titrationIsConcordant || model.titrationProceedAnyway {
                     Divider()
                     Text("Calculate the concentration of NaOH (mol/dm³)").font(.caption.bold())
                     Text("moles HCl = moles NaOH at the end-point; 25.0 cm³ of \(String(format: "%.3f", model.titrationHCl_M)) mol/dm³ HCl was used.").font(.caption2).foregroundStyle(.secondary)
@@ -1131,9 +1381,69 @@ struct ChemistryPracticalLabView: View {
                 }
             }
         case .separation:
-            VStack(alignment: .leading, spacing: 8) { Text("Mixture: \(model.mixtureLabel)").font(.subheadline.bold()); Text("Stage \(model.separationStep + 1) of 3: choose the operation, then identify what you collect.").font(.caption); Picker("Sequence", selection: $model.choice) { Text("Select…").tag(""); Text("Filter → evaporate → crystallise").tag("Filter → evaporate → crystallise"); Text("Separating funnel → distil").tag("Separating funnel → distil"); Text("Chromatography only").tag("Chromatography only") }.pickerStyle(.menu); Picker("Collected fraction", selection: $model.separationCollected) { Text("Select collected material…").tag(""); Text("Solid residue").tag("Solid residue"); Text("Crystals").tag("Crystals"); Text("Top liquid layer").tag("Top liquid layer"); Text("Distillate").tag("Distillate") }.pickerStyle(.menu); Button(model.separationStep < 2 ? "Complete stage" : "Record plan") { if model.separationStep < 2 { model.separationStep += 1 } else { model.record() } }.buttonStyle(.borderedProminent).disabled(model.choice.isEmpty || model.separationCollected.isEmpty) }
+            VStack(alignment: .leading, spacing: 10) {
+                Text("Mixture: \(model.mixtureLabel)").font(.subheadline.bold())
+                switch model.separationMixtureType {
+                case .saltAndSand:
+                    if !model.filterPrepared {
+                        Text("Fold the filter paper into a cone, wet it, and seat it in the funnel.").font(.caption)
+                        Button("Fold & wet filter paper, place in funnel") { model.prepareFilter() }.buttonStyle(.borderedProminent)
+                    } else if !model.filtered {
+                        HStack { Text("Pour rate"); Slider(value: $model.pourRate, in: 0...1); Text(model.pourRate > 0.7 ? "Fast" : "Steady").font(.caption) }
+                        Button("Pour mixture through the filter") { model.pourMixtureThroughFilter() }.buttonStyle(.borderedProminent)
+                    } else {
+                        Text(model.pouredTooFast ? "Some solid escaped into the filtrate — it overflowed the paper." : "Residue (sand) is in the filter paper; filtrate (salt solution) is in the beaker.").font(.caption).foregroundStyle(model.pouredTooFast ? .orange : .secondary)
+                        if model.evaporationChoice.isEmpty {
+                            Text("How do you recover the salt from the filtrate?").font(.caption.bold())
+                            Button("Evaporate until saturated, then cool") { model.chooseEvaporation("Until saturated, then cool") }.buttonStyle(.borderedProminent)
+                            Button("Evaporate to complete dryness") { model.chooseEvaporation("To dryness") }.buttonStyle(.bordered)
+                        } else {
+                            Text(model.evaporationChoice == "Until saturated, then cool" ? "Good crystals formed on cooling." : "Evaporating to dryness spoiled the crystals.").font(.caption.weight(.semibold)).foregroundStyle(model.evaporationChoice == "Until saturated, then cool" ? .green : .orange)
+                            Button("Finish & get feedback") { model.record() }.buttonStyle(.borderedProminent).disabled(!model.canRecord)
+                        }
+                    }
+                case .immiscibleLiquids:
+                    if model.funnelOutcome == nil {
+                        Text("The denser liquid settles at the bottom. Open the tap and close it right at the interface between the two layers.").font(.caption)
+                        ProgressView(value: min(model.funnelDrainedAmount, 1.4), total: 1.4).tint(.blue)
+                        HStack {
+                            Button(model.funnelDraining ? "CLOSE TAP" : "OPEN TAP") { model.funnelDraining ? model.closeFunnelTap() : model.openFunnelTap() }
+                                .buttonStyle(.borderedProminent).tint(model.funnelDraining ? .red : .accentColor)
+                        }
+                    } else {
+                        Text(model.funnelOutcome ?? "").font(.caption.weight(.semibold)).foregroundStyle(model.funnelOutcome == "Closed at the interface — clean separation" ? .green : .orange)
+                        if !model.distillateReady {
+                            Button("Heat & distil the collected liquid") { model.distillCollectedLiquid() }.buttonStyle(.borderedProminent)
+                        } else {
+                            Text("Distillate collected once the temperature stayed constant at the boiling point.").font(.caption).foregroundStyle(.secondary)
+                            Button("Finish & get feedback") { model.record() }.buttonStyle(.borderedProminent).disabled(!model.canRecord)
+                        }
+                    }
+                }
+            }
         case .solubility:
-            VStack(alignment: .leading, spacing: 10) { Text("Run a four-stage crystallisation practical: dissolve, concentrate, cool, then filter and dry.").font(.subheadline); Text("Stage \(model.solubilityStep + 1) of 4").font(.headline); Slider(value: $model.solubilityDissolvedMass, in: 2...15, step: 0.5); Text("Solute added: \(String(format: "%.1f", model.solubilityDissolvedMass)) g").font(.caption); Slider(value: $model.solubilityCoolingTemp, in: 5...90, step: 1); Text("Cooling temperature: \(Int(model.solubilityCoolingTemp)) °C").font(.caption); Toggle("Filter and dry crystals", isOn: $model.solubilityFiltered); TextField("Crystals recovered (g)", text: $model.input).keyboardType(.decimalPad).textFieldStyle(.roundedBorder); Button(model.solubilityStep < 3 ? "Complete stage" : "Record crystallisation result") { if model.solubilityStep < 3 { model.solubilityStep += 1 } else { model.record() } }.buttonStyle(.borderedProminent).disabled(model.solubilityStep < 3 ? false : !model.canRecord); Text("Avoid evaporating to dryness; crystals form when a hot saturated solution cools.").font(.caption).foregroundStyle(.secondary) }
+            VStack(alignment: .leading, spacing: 10) {
+                Text("Add solid in small portions and stir. Watch what actually happens after each portion.").font(.caption)
+                Text("Added so far: \(String(format: "%.1f", model.solubilityAddedMass)) g").font(.headline.monospacedDigit())
+                if !model.solubilityDeclaredSaturated {
+                    Button("Add a portion & stir") { model.addSolidPortion() }.buttonStyle(.borderedProminent)
+                    if model.solubilityAddedMass > 0 {
+                        Text(model.solubilityLastPortionDissolved ? "Dissolved completely." : "A little solid remains undissolved even after stirring.").font(.caption).foregroundStyle(model.solubilityLastPortionDissolved ? .secondary : .orange)
+                    }
+                    Button("This looks saturated — stop here") { model.declareSaturated() }.buttonStyle(.bordered).disabled(model.solubilityAddedMass == 0)
+                } else {
+                    Text("Saturated at \(String(format: "%.1f", model.solubilityAddedMass)) g.").font(.caption.weight(.semibold)).foregroundStyle(.green)
+                    if !model.solubilityFilteredExcess {
+                        Button("Filter off the excess solid") { model.filterExcessSolid() }.buttonStyle(.borderedProminent)
+                    } else {
+                        Divider()
+                        HStack { Text("Cool to"); Slider(value: $model.solubilityCoolingTemp, in: 5...90, step: 1); Text("\(Int(model.solubilityCoolingTemp)) °C").monospacedDigit() }
+                        Text("Cooling further lowers solubility, so more crystals come out of solution.").font(.caption2).foregroundStyle(.secondary)
+                        TextField("Crystals recovered (g)", text: $model.input).keyboardType(.decimalPad).textFieldStyle(.roundedBorder)
+                        Button("Record crystallisation result") { model.record() }.buttonStyle(.borderedProminent).disabled(!model.canRecord)
+                    }
+                }
+            }
         }
         if model.result != nil { Button("New practical task") { model.resetTask() }.buttonStyle(.bordered).frame(maxWidth: .infinity) }
     }

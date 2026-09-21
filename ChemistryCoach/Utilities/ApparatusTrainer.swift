@@ -26,7 +26,7 @@ struct ApparatusTrainer {
             reading = value; tolerance = 0.5; state = .thermometer(tempC:value)
             prompt = "Read the thermometer scale and record the temperature with suitable precision."; trap = "Do not overstate the precision of an analogue thermometer."
         case .gasSyringe:
-            let value = Double(rng.nextInt(50, 800))
+            let value = Double(rng.nextInt(15, 95))
             reading = value; tolerance = 1; state = .gasSyringe(volumeCm3:value)
             prompt = "Read the gas syringe volume at eye level."; trap = "Check the zero and read the scale at eye level."
         case .stopwatch:
