@@ -68,7 +68,7 @@ final class AceViewModel {
 
     init(
         repository: AttemptRepository,
-        curriculum: Curriculum = .general,
+        curriculum: Curriculum = .singapore,
         filterTopic: AceTopic? = nil,
         filterSkill: AceSkillArea? = nil,
         isMockExam: Bool = false,

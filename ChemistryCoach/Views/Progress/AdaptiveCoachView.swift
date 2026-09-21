@@ -82,7 +82,12 @@ private struct RecommendationRow: View {
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(recommendation.title).font(.subheadline.weight(.semibold))
-                Text(recommendation.detail).font(.caption).foregroundStyle(.secondary).lineLimit(2)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(recommendation.detail).font(.caption).foregroundStyle(.secondary).lineLimit(2)
+                    if let error = recommendation.commonError {
+                        Text("Pattern: \(error)").font(.caption2.weight(.semibold)).foregroundStyle(.orange).lineLimit(1)
+                    }
+                }
             }
 
             Spacer()

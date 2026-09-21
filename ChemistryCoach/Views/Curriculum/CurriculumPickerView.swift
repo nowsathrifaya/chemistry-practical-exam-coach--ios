@@ -23,7 +23,7 @@ struct CurriculumPickerView: View {
                     Text("Choose your curriculum")
                         .font(.largeTitle.bold())
                         .multilineTextAlignment(.center)
-                    Text("This tailors apparatus, simulations, and graph practice to your exam board.")
+                    Text("Built specifically for the Singapore-Cambridge O-Level Chemistry practical examination.")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
@@ -31,7 +31,7 @@ struct CurriculumPickerView: View {
                 .padding(.top, isOnboarding ? 32 : 8)
 
                 LazyVStack(spacing: 14) {
-                    ForEach(Curriculum.allCases) { curriculum in
+                    ForEach([Curriculum.singapore]) { curriculum in
                         let profile = CurriculumProfiles.forCurriculum(curriculum)
                         Button {
                             homeViewModel.saveCurriculum(curriculum) {
@@ -89,7 +89,7 @@ private struct CurriculumCard: View {
         CurriculumPickerView(
             homeViewModel: HomeViewModel(
                 preferences: UserPreferencesStore(),
-                attemptRepository: AttemptRepository(modelContext: try! ModelContainer(for: Attempt.self).mainContext)
+                attemptRepository: AttemptRepository(modelContext: ModelContainer.preview.mainContext)
             ),
             isOnboarding: true
         )

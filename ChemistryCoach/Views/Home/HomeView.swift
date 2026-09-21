@@ -36,11 +36,13 @@ struct HomeView: View {
 
                 statsRow
 
+                PracticalReadinessCard(attempts: homeViewModel.attempts, curriculum: homeViewModel.curriculum)
+
                 AdaptiveCoachView(homeViewModel: homeViewModel)
 
                 quickActionsRow
 
-                Text("Quick actions")
+                Text("Practice")
                     .font(.title3.bold())
                     .padding(.top, 4)
 

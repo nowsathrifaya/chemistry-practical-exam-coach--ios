@@ -105,7 +105,7 @@ struct MockPracticalView: View {
     @State private var feedback: [String] = []
     @State private var didRecord = false
 
-    init(curriculum: Curriculum = .general) {
+    init(curriculum: Curriculum = .singapore) {
         self.curriculum = curriculum
     }
 

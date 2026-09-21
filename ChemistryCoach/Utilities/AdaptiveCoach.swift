@@ -16,6 +16,7 @@ struct AdaptiveRecommendation: Identifiable, Hashable {
     let accuracy: Int
     let attempts: Int
     let action: AdaptiveAction
+    let commonError: String?
 }
 
 enum AdaptiveAction: Hashable {
@@ -39,7 +40,8 @@ enum AdaptiveCoach {
                 detail: "Run an unknown-sample test, record observations, then identify the ion.",
                 accuracy: 0,
                 attempts: 0,
-                action: .qualitative
+                action: .qualitative,
+                commonError: nil
             )]
         }
 
@@ -56,6 +58,7 @@ enum AdaptiveCoach {
             guard !related.isEmpty else { continue }
             let accuracy = Int((related.reduce(0.0) { $0 + ratio($1) } / Double(related.count) * 100).rounded())
             let title = title(for: action)
+            let commonError = mostCommonError(in: related)
             candidates.append(AdaptiveRecommendation(
                 id: key,
                 title: title,
@@ -63,7 +66,8 @@ enum AdaptiveCoach {
                 detail: detail(for: action, accuracy: accuracy),
                 accuracy: accuracy,
                 attempts: related.count,
-                action: action
+                action: action,
+                commonError: commonError
             ))
         }
 
@@ -114,6 +118,13 @@ enum AdaptiveCoach {
     static func ratio(_ attempt: Attempt) -> Double {
         guard attempt.maxScore > 0 else { return 0 }
         return max(0, min(1, Double(attempt.score) / Double(attempt.maxScore)))
+    }
+
+    private static func mostCommonError(in attempts: [Attempt]) -> String? {
+        let errors = attempts.compactMap(\.errorTypeValue)
+        guard !errors.isEmpty else { return nil }
+        let grouped = Dictionary(grouping: errors, by: { $0 })
+        return grouped.max { lhs, rhs in lhs.value.count < rhs.value.count }?.key.label
     }
 
     private static func key(for action: AdaptiveAction) -> String {

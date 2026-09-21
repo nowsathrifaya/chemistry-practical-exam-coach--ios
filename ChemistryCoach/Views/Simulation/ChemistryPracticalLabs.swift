@@ -4,6 +4,22 @@ import Combine
 // MARK: - Titration realism model (Section 2: continuous burette flow,
 // rough/accurate titrations, concordance, endpoint decision)
 
+enum PracticalWorkflowStage: Int, CaseIterable, Codable {
+    case prepare = 0
+    case perform = 1
+    case measure = 2
+    case analyse = 3
+
+    var title: String {
+        switch self {
+        case .prepare: return "Prepare"
+        case .perform: return "Perform"
+        case .measure: return "Measure"
+        case .analyse: return "Analyse"
+        }
+    }
+}
+
 enum TitrationMode: String, CaseIterable, Identifiable, Hashable {
     case rough = "Rough"
     case accurate = "Accurate"
@@ -57,6 +73,7 @@ final class ChemistryLabViewModel: ObservableObject {
     @Published var elapsed: Double = 0
     @Published var phase = 0
     @Published var actionState: VirtualLabActionState = .idle
+    @Published private(set) var workflowStage: PracticalWorkflowStage = .prepare
     @Published var observedChanges: [String] = []
     @Published var reactionProgress: Double = 0
     @Published var buretteReading: Double = 0
@@ -193,47 +210,48 @@ final class ChemistryLabViewModel: ObservableObject {
         }
     }
 
-    var currentStage: Int {
-        switch type {
-        case .solubility:
-            let progress = (solubilityDeclaredSaturated ? 2 : 0) + (solubilityFilteredExcess ? 1 : 0) + (solubilityAddedMass > 0 && !solubilityDeclaredSaturated ? 1 : 0)
-            return min(progress, type.practicalStages.count - 1)
-        case .separation:
-            let progress: Int
-            switch separationMixtureType {
-            case .saltAndSand: progress = (filterPrepared ? 1 : 0) + (filtered ? 1 : 0) + (crystalsObtained ? 1 : 0)
-            case .immiscibleLiquids: progress = (funnelOutcome != nil ? 2 : 0) + (distillateReady ? 1 : 0)
-            }
-            return min(progress, type.practicalStages.count - 1)
-        case .titration: return min(stageFromState, type.practicalStages.count - 1)
-        default: return min(stageFromState, type.practicalStages.count - 1)
-        }
+    /// One authoritative workflow for every practical. Domain-specific action states
+    /// describe what is happening inside a stage; they never determine the exam stage.
+    var currentStage: Int { workflowStage.rawValue }
+
+    var workflowStageTitle: String { workflowStage.title }
+
+    var canEnterAnalyse: Bool { workflowStage == .measure && result == nil }
+
+    func enterMeasure() {
+        guard result == nil, workflowStage == .perform else { return }
+        workflowStage = .measure
+        actionState = .measured
     }
 
+    func enterAnalyse() {
+        guard result == nil, workflowStage == .measure else { return }
+        workflowStage = .analyse
+        actionState = .measured
+    }
 
-    private var stageFromState: Int {
-        switch actionState {
-        case .idle: return 0
-        case .prepared: return 1
-        case .addingReagent, .reacting, .observing: return 1
-        case .measured: return 2
-        case .analysed: return 3
-        }
+    func analyseResults() {
+        guard result == nil, workflowStage == .analyse else { return }
+        grade()
     }
 
     var actionHint: String {
-        switch actionState {
-        case .idle: return "Begin by preparing the apparatus and selecting the required materials."
-        case .prepared: return "Carry out the procedure. Watch the apparatus for a visible change."
-        case .addingReagent: return "Add carefully and observe the colour, precipitate, bubbles or temperature change."
-        case .reacting: return "The reaction is in progress. Wait for the required observation or reading."
-        case .observing: return "Record the observation before moving to measurement."
-        case .measured: return "Use the observation and measurement to complete the analysis."
-        case .analysed: return "All required stages are complete."
+        switch workflowStage {
+        case .prepare: return "Prepare the apparatus, reagents and safety equipment. The practical cannot begin until preparation is completed."
+        case .perform: return "Perform the practical procedure. Use the experiment controls and do not skip the experimental actions."
+        case .measure: return "Measure and record the evidence you produced. Use the correct units and appropriate precision."
+        case .analyse: return "Analyse your recorded evidence, complete the calculation/conclusion, then get feedback."
         }
     }
 
-    func prepare() { guard result == nil else { return }; actionState = .prepared; reagentBottleOpen = false; reagentDispensed = false; observedChanges.append("Apparatus and reagents checked") }
+    func prepare() {
+        guard result == nil, workflowStage == .prepare else { return }
+        workflowStage = .perform
+        actionState = .prepared
+        reagentBottleOpen = false
+        reagentDispensed = false
+        observedChanges.append("Apparatus and reagents checked — Perform stage started")
+    }
     func openReagentBottle(_ reagent: String) {
         guard type == .qualitativeAnalysis, result == nil, actionState != .idle else { return }
         qualitativeReagent = reagent
@@ -248,6 +266,7 @@ final class ChemistryLabViewModel: ObservableObject {
         actionState = .reacting
         qualitativeObservation = qualitativeReagent == "Acidified silver nitrate" ? "White precipitate" : qualitativeReagent == "Lighted splint" ? "Squeaky pop" : "Effervescence; limewater milky"
         observedChanges.append("Reagent added; visible reaction is ready to observe")
+        enterMeasure()
     }
     func performInteractiveAction() {
         guard result == nil else { return }
@@ -259,7 +278,7 @@ final class ChemistryLabViewModel: ObservableObject {
         case .qualitativeAnalysis:
             if !reagentBottleOpen { openReagentBottle(qualitativeReagent.isEmpty ? "Acidified silver nitrate" : qualitativeReagent) }
             else if !reagentDispensed { dispenseSelectedReagent() }
-            else { actionState = .observing; reactionProgress = min(1, reactionProgress + 0.25) }
+            else { reactionProgress = min(1, reactionProgress + 0.25); enterMeasure() }
         case .rateReaction:
             if startedAt == nil { startRate() } else { recordGasReading() }
         case .electrolysis:
@@ -283,21 +302,15 @@ final class ChemistryLabViewModel: ObservableObject {
         }
     }
 
+    /// Only preparation can be advanced generically. Perform/Measure/Analyse are
+    /// completed by the actual practical controls below, so the student cannot
+    /// click through the four stages without doing the experiment.
     func advanceAction() {
-        guard result == nil else { return }
-        switch actionState {
-        case .idle: prepare()
-        case .prepared: actionState = type == .rateReaction ? .reacting : .addingReagent
-        case .addingReagent: actionState = .observing
-        case .reacting: actionState = .observing
-        case .observing: actionState = .measured
-        case .measured: actionState = .analysed
-        case .analysed: break
-        }
+        prepare()
     }
 
     var canRecord: Bool {
-        guard result == nil else { return false }
+        guard result == nil, workflowStage == .measure else { return false }
         switch type {
         case .titration: return false // titration uses its own dedicated attempt/finalize controls, not the generic Record button
         case .qualitativeAnalysis: return actionState != .idle && !qualitativeReagent.isEmpty && !qualitativeObservation.isEmpty
@@ -348,6 +361,7 @@ final class ChemistryLabViewModel: ObservableObject {
         let start = Date()
         startedAt = start
         elapsed = 0
+        actionState = .reacting
         rateStudentReadings = []
         timerTask?.cancel()
         timerTask = Task { @MainActor [weak self] in
@@ -367,6 +381,7 @@ final class ChemistryLabViewModel: ObservableObject {
         guard type == .rateReaction, startedAt != nil, result == nil else { return }
         rateStudentReadings.append(RateReading(time: (elapsed * 10).rounded() / 10, volume: (gasVolume * 10).rounded() / 10))
         rateTotalSubReadings += 1
+        actionState = .observing
     }
 
     var rateCanStop: Bool { type == .rateReaction && startedAt != nil && rateStudentReadings.count >= 3 }
@@ -405,7 +420,12 @@ final class ChemistryLabViewModel: ObservableObject {
         readings.append(LabReading(trialNumber: readings.count + 1, label: "Trial \(readings.count + 1) average rate", value: avg, unit: "cm³/s"))
         startedAt = nil; timerTask?.cancel(); timerTask = nil
         rateStudentReadings = []
-        if readings.count >= targetTrials { grade() }
+        if readings.count >= targetTrials {
+            enterMeasure()
+        } else {
+            workflowStage = .perform
+            actionState = .prepared
+        }
     }
 
     // MARK: - Energetics: continuous temperature curve with a peak-reading decision (Section 6)
@@ -467,8 +487,8 @@ final class ChemistryLabViewModel: ObservableObject {
             outcome = target > 0 ? "Peak temperature captured well" : "Lowest temperature captured well"
         }
         energeticsRecordOutcome = outcome
-        actionState = .observing
         observedChanges.append("\(outcome): recorded \(String(format: "%.1f", recorded))°C at t = \(String(format: "%.0f", energeticsElapsedRun)) s")
+        enterMeasure()
     }
 
     // MARK: - Chromatography: baseline placement + continuous solvent rise (Section 7)
@@ -524,6 +544,7 @@ final class ChemistryLabViewModel: ObservableObject {
         }
         chromatographyRemovalOutcome = outcome
         observedChanges.append("\(outcome). Solvent front marked \(String(format: "%.1f", chromatographySolventFront)) cm above the baseline.")
+        enterMeasure()
     }
 
     // MARK: - Separation techniques: real apparatus operation (Section 8)
@@ -532,6 +553,7 @@ final class ChemistryLabViewModel: ObservableObject {
     func prepareFilter() {
         guard type == .separation, separationMixtureType == .saltAndSand, !filterPrepared else { return }
         filterPrepared = true
+        actionState = .reacting
         observedChanges.append("Filter paper folded into a cone, wetted, and seated in the funnel.")
     }
 
@@ -539,6 +561,7 @@ final class ChemistryLabViewModel: ObservableObject {
     func pourMixtureThroughFilter() {
         guard type == .separation, filterPrepared, !filtered else { return }
         filtered = true
+        actionState = .observing
         if pourRate > 0.7 {
             pouredTooFast = true
             observedChanges.append("Poured too quickly — the level rose above the rim of the filter paper and some sand escaped into the filtrate.")
@@ -553,6 +576,7 @@ final class ChemistryLabViewModel: ObservableObject {
         guard type == .separation, filtered, evaporationChoice.isEmpty else { return }
         evaporationChoice = choice
         crystalsObtained = true
+        enterMeasure()
         if choice == "Until saturated, then cool" {
             observedChanges.append("Crystals form as the saturated solution cools — a good yield of well-formed crystals.")
         } else {
@@ -591,11 +615,13 @@ final class ChemistryLabViewModel: ObservableObject {
         }
         funnelOutcome = outcome
         observedChanges.append(outcome)
+        actionState = .observing
     }
 
     func distillCollectedLiquid() {
         guard type == .separation, funnelOutcome != nil, !distillateReady else { return }
         distillateReady = true
+        enterMeasure()
         observedChanges.append("Heated the collected liquid; it boiled at a constant temperature and the distillate was collected past the condenser.")
     }
 
@@ -606,6 +632,7 @@ final class ChemistryLabViewModel: ObservableObject {
     func addSolidPortion() {
         guard type == .solubility, !solubilityDeclaredSaturated, result == nil else { return }
         solubilityAddedMass += 1.0
+        actionState = .reacting
         let dissolvedFully = solubilityAddedMass <= target
         solubilityLastPortionDissolved = dissolvedFully
         if !dissolvedFully { solubilityExcessPortions += 1 }
@@ -620,6 +647,7 @@ final class ChemistryLabViewModel: ObservableObject {
             observedChanges.append("Declared saturated while everything was still dissolving — add more solid and check again.")
         } else {
             solubilityDeclaredSaturated = true
+            actionState = .observing
             observedChanges.append("Saturation reached: \(String(format: "%.1f", solubilityAddedMass)) g added, a trace of solid remains undissolved.")
         }
     }
@@ -627,6 +655,7 @@ final class ChemistryLabViewModel: ObservableObject {
     func filterExcessSolid() {
         guard type == .solubility, solubilityDeclaredSaturated, !solubilityFilteredExcess else { return }
         solubilityFilteredExcess = true
+        enterMeasure()
         observedChanges.append("Excess undissolved solid filtered off, leaving a clear saturated filtrate.")
     }
 
@@ -727,7 +756,7 @@ final class ChemistryLabViewModel: ObservableObject {
         // A wrong endpoint is a scored practical mistake, not a dead end.
         // Move the workflow forward so the student can refill and continue with
         // the next attempt / calculation using the reading they actually took.
-        actionState = .measured
+        enterMeasure()
         return outcome
     }
 
@@ -794,7 +823,7 @@ final class ChemistryLabViewModel: ObservableObject {
     /// Completes the titration: checks the student's concentration calculation,
     /// builds a per-skill mark breakdown, and records the attempt.
     func finalizeTitration() {
-        guard type == .titration, titrationCanFinalize, result == nil else { return }
+        guard type == .titration, titrationCanFinalize, workflowStage == .analyse, result == nil else { return }
         let mean = titrationMeanConcordantTitre ?? 0
         let expected = titrationExpectedConcentration ?? 0
         let studentValue = Double(titrationConcentrationInput.replacingOccurrences(of: ",", with: ".").trimmingCharacters(in: .whitespaces))
@@ -846,6 +875,8 @@ final class ChemistryLabViewModel: ObservableObject {
             ],
             mistakes: mistakes
         )
+        workflowStage = .analyse
+        actionState = .analysed
         result = outcome
         recorder.record(experimentTitle: type.label, result: outcome)
     }
@@ -882,9 +913,12 @@ final class ChemistryLabViewModel: ObservableObject {
             let mass = Double(input.replacingOccurrences(of: ",", with: ".")) ?? 0
             readings.append(LabReading(trialNumber: readings.count + 1, label: "Crystals recovered", value: mass, unit: "g", derivedLabel: "Expected yield", derivedValue: solubilityExpectedYield, derivedUnit: "g"))
         }
-        let requiredTrials = (type == .electrolysis) ? 1 : targetTrials
-        let shouldGrade = readings.count >= requiredTrials
-        if shouldGrade { grade() }
+        let requiredTrials = (type == .rateReaction) ? targetTrials : 1
+        let measurementComplete = readings.count >= requiredTrials
+        if measurementComplete {
+            workflowStage = .analyse
+            actionState = .measured
+        }
         input = ""
         choice = ""
         electrolysisCathode = ""; electrolysisAnode = ""
@@ -901,7 +935,7 @@ final class ChemistryLabViewModel: ObservableObject {
     }
 
     func grade() {
-        guard readings.count > 0 else { return }
+        guard workflowStage == .analyse, result == nil, !readings.isEmpty else { return }
         var score = 0
         var feedback: [String] = []
         var resultSkillMarks: [PracticalSkillMark] = []
@@ -1058,6 +1092,8 @@ final class ChemistryLabViewModel: ObservableObject {
             if solubilityExcessPortions > 1 { resultMistakes.append(PracticalMistake(title: "Added several portions past the point of saturation", consequence: "Adding much more than needed makes the mass added an overestimate of the true solubility.")) }
         }
         let outcome = LabRunResult(correct: score >= 80, score: score, feedback: feedback, examTip: examTip, skillMarks: resultSkillMarks, mistakes: resultMistakes)
+        workflowStage = .analyse
+        actionState = .analysed
         result = outcome
         recorder.record(experimentTitle: type.label, result: outcome)
     }
@@ -1065,7 +1101,7 @@ final class ChemistryLabViewModel: ObservableObject {
     func resetTask() {
         motion.reset()
         timerTask?.cancel(); timerTask = nil; startedAt = nil; elapsed = 0
-        readings = []; result = nil; actionState = .idle; observedChanges = []; reactionProgress = 0; input = ""; choice = ""; electrolysisElectrolyte = "Copper sulfate solution"; electrolysisCathode = ""; electrolysisAnode = ""; electrolysisCircuitOn = false; electrolysisCathodeEquation = ""; electrolysisAnodeEquation = ""; electrolysisHasSwitchedOn = false; qualitativeReagent = ""; qualitativeObservation = ""; reagentBottleOpen = false; reagentDispensed = false; qualitativeStep = 0; solubilityCoolingTemp = 20.0; control = 0.5; energeticsMass = 100.0; energeticsInitialTemp = 20.0; energeticsFinalTemp = 25.8; energeticsStarted = false; energeticsElapsedRun = 0; energeticsRecordedTemp = nil; energeticsRecordOutcome = nil; buretteReading = 0; flaskColourProgress = 0; lastDropwise = false
+        readings = []; result = nil; actionState = .idle; workflowStage = .prepare; observedChanges = []; reactionProgress = 0; input = ""; choice = ""; electrolysisElectrolyte = "Copper sulfate solution"; electrolysisCathode = ""; electrolysisAnode = ""; electrolysisCircuitOn = false; electrolysisCathodeEquation = ""; electrolysisAnodeEquation = ""; electrolysisHasSwitchedOn = false; qualitativeReagent = ""; qualitativeObservation = ""; reagentBottleOpen = false; reagentDispensed = false; qualitativeStep = 0; solubilityCoolingTemp = 20.0; control = 0.5; energeticsMass = 100.0; energeticsInitialTemp = 20.0; energeticsFinalTemp = 25.8; energeticsStarted = false; energeticsElapsedRun = 0; energeticsRecordedTemp = nil; energeticsRecordOutcome = nil; buretteReading = 0; flaskColourProgress = 0; lastDropwise = false
         solubilityAddedMass = 0; solubilityLastPortionDissolved = true; solubilityDeclaredSaturated = false; solubilityFilteredExcess = false; solubilityPrematureDeclarations = 0; solubilityExcessPortions = 0
         filterPrepared = false; pourRate = 0.4; filtered = false; pouredTooFast = false; evaporationChoice = ""; crystalsObtained = false; funnelDraining = false; funnelDrainedAmount = 0; funnelOutcome = nil; distillateReady = false
         chromatographySolventFront = 0; chromatographyBaselineHeight = 1.0; chromatographyBaselineMistake = false; chromatographyStarted = false; chromatographyRemoved = false; chromatographyRemovalOutcome = nil
@@ -1120,8 +1156,8 @@ final class ChemistryLabViewModel: ObservableObject {
             actionState = .reacting
             observedChanges.append("Circuit switched ON — bubbles begin forming at both electrodes")
         } else {
-            actionState = .observing
-            observedChanges.append("Circuit switched OFF")
+            observedChanges.append("Circuit switched OFF — observations can now be measured")
+            enterMeasure()
         }
     }
     private func equationLooksRight(_ equation: String, mustContain tokens: [String]) -> Bool {
@@ -1211,16 +1247,31 @@ struct ChemistryPracticalLabView: View {
                 Text("Practical procedure").font(.headline)
                 Text(model.instruction).font(.caption)
             }.padding(10).background(Color(.systemBackground), in: RoundedRectangle(cornerRadius: 10))
+            HStack(spacing: 8) {
+                Label("Stage \(model.workflowStage.rawValue + 1)/4: \(model.workflowStageTitle)", systemImage: "list.number")
+                    .font(.caption.weight(.bold))
+                Text("Prepare → Perform → Measure → Analyse")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
             Label("Action state: \(model.actionState.rawValue.capitalized)", systemImage: "waveform.path.ecg").font(.caption.weight(.semibold))
             Text(model.actionHint).font(.caption).foregroundStyle(.secondary)
+            if model.workflowStage == .measure {
+                Button("Continue to Analyse") { model.enterAnalyse() }
+                    .buttonStyle(.borderedProminent)
+            } else if model.workflowStage == .analyse && model.type != .titration && model.type != .rateReaction {
+                Button("Analyse results & get feedback") { model.analyseResults() }
+                    .buttonStyle(.borderedProminent)
+            }
             HStack {
-                Button(model.actionState == .idle ? "Prepare apparatus" : "Advance action") { model.advanceAction() }.buttonStyle(.borderedProminent).disabled(model.actionState == .analysed || model.result != nil)
-                Button("Perform lab action") { model.performInteractiveAction() }.buttonStyle(.bordered).disabled(model.result != nil)
+                Button("Prepare apparatus") { model.advanceAction() }.buttonStyle(.borderedProminent).disabled(model.actionState != .idle || model.result != nil)
+                Button("Perform lab action") { model.performInteractiveAction() }.buttonStyle(.bordered).disabled(model.result != nil || model.workflowStage != .perform)
                 Spacer()
                 if !model.observedChanges.isEmpty { Text("\(model.observedChanges.last!)").font(.caption2).foregroundStyle(.green) }
             }
         }.padding(10).background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12))
         TrialProgressView(completed: model.readings.count, target: model.targetTrials)
+        Group {
         switch model.type {
         case .titration:
             VStack(alignment: .leading, spacing: 10) {
@@ -1285,7 +1336,7 @@ struct ChemistryPracticalLabView: View {
                     Text("Calculate the concentration of NaOH (mol/dm³)").font(.caption.bold())
                     Text("moles HCl = moles NaOH at the end-point; 25.0 cm³ of \(String(format: "%.3f", model.titrationHCl_M)) mol/dm³ HCl was used.").font(.caption2).foregroundStyle(.secondary)
                     TextField("Concentration (mol/dm³)", text: $model.titrationConcentrationInput).keyboardType(.decimalPad).textFieldStyle(.roundedBorder)
-                    Button("Finish titration & get feedback") { model.finalizeTitration() }.buttonStyle(.borderedProminent).disabled(model.titrationConcentrationInput.trimmingCharacters(in: .whitespaces).isEmpty)
+                    Button("Finish titration & get feedback") { model.finalizeTitration() }.buttonStyle(.borderedProminent).disabled(model.workflowStage != .analyse || model.titrationConcentrationInput.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
             }
         case .qualitativeAnalysis:
@@ -1338,6 +1389,10 @@ struct ChemistryPracticalLabView: View {
                     Text("Completed trials").font(.caption.bold())
                     ForEach(model.readings) { r in
                         HStack { Text(r.label).font(.caption2); Spacer(); Text(String(format: "%.2f %@", r.value, r.unit)).font(.caption2.monospacedDigit()) }
+                    }
+                    if model.readings.count >= model.targetTrials && model.actionState == .measured {
+                        Button("Analyse results & get feedback") { model.analyseResults() }
+                            .buttonStyle(.borderedProminent)
                     }
                 }
             }
@@ -1486,6 +1541,8 @@ struct ChemistryPracticalLabView: View {
                 }
             }
         }
+        }
+        .disabled(model.actionState == .idle || model.result != nil)
         if model.result != nil { Button("New practical task") { model.resetTask() }.buttonStyle(.bordered).frame(maxWidth: .infinity) }
     }
 }

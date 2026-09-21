@@ -55,5 +55,10 @@ enum CurriculumProfiles {
         homeHeadlineLine2: "Paper 3 Practical Coach"
     )
     static let general = singapore
-    static func forCurriculum(_ curriculum: Curriculum) -> CurriculumProfile { singapore }
+    static func forCurriculum(_ curriculum: Curriculum) -> CurriculumProfile {
+        // GENERAL is a legacy stored value only. Until a separate General
+        // syllabus is implemented, always resolve it to the real Singapore
+        // profile instead of presenting duplicate curriculum choices.
+        singapore
+    }
 }

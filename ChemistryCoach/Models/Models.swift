@@ -3,9 +3,72 @@ import Foundation
 
 enum Curriculum: String, CaseIterable, Codable, Identifiable {
     case singapore = "SINGAPORE"
+    // Kept only for backwards compatibility with older saved preferences.
+    // It is intentionally not offered as a selectable curriculum because the
+    // app does not contain a separate General curriculum implementation.
     case general = "GENERAL"
     var id: String { rawValue }
-    var label: String { self == .singapore ? "Singapore O-Level" : "General" }
+    var label: String { self == .singapore ? "Singapore O-Level" : "Legacy / unsupported" }
+}
+
+enum PracticalSkill: String, CaseIterable, Codable, Identifiable {
+    case planning = "PLANNING"
+    case mmo = "MMO"
+    case pdo = "PDO"
+    case ace = "ACE"
+
+    var id: String { rawValue }
+    var label: String {
+        switch self {
+        case .planning: return "Planning"
+        case .mmo: return "Manipulation, Measurement & Observation"
+        case .pdo: return "Presentation of Data & Observations"
+        case .ace: return "Analysis, Conclusions & Evaluation"
+        }
+    }
+    var shortLabel: String {
+        switch self {
+        case .planning: return "Planning"
+        case .mmo: return "MMO"
+        case .pdo: return "PDO"
+        case .ace: return "ACE"
+        }
+    }
+}
+
+enum PracticalErrorType: String, CaseIterable, Codable, Identifiable {
+    case meniscus = "MENISCUS"
+    case unit = "UNIT"
+    case precision = "PRECISION"
+    case formula = "FORMULA"
+    case calculation = "CALCULATION"
+    case observationInference = "OBSERVATION_INFERENCE"
+    case graphScale = "GRAPH_SCALE"
+    case graphPlotting = "GRAPH_PLOTTING"
+    case unsupportedConclusion = "UNSUPPORTED_CONCLUSION"
+    case controlVariable = "CONTROL_VARIABLE"
+    case safety = "SAFETY"
+    case technique = "TECHNIQUE"
+    case unknown = "UNKNOWN"
+
+    var id: String { rawValue }
+    var label: String {
+        switch self {
+        case .meniscus: return "Meniscus / scale reading"
+        case .unit: return "Units"
+        case .precision: return "Precision / significant figures"
+        case .formula: return "Formula selection"
+        case .calculation: return "Calculation"
+        case .observationInference: return "Observation vs inference"
+        case .graphScale: return "Graph scale"
+        case .graphPlotting: return "Graph plotting"
+        case .unsupportedConclusion: return "Conclusion not supported by data"
+        case .controlVariable: return "Control variables"
+        case .safety: return "Safety"
+        case .technique: return "Experimental technique"
+        case .unknown: return "General"
+        }
+    }
 }
 
 enum ApparatusType: String, CaseIterable, Codable, Identifiable {

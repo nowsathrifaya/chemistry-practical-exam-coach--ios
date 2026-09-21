@@ -21,9 +21,10 @@ struct StructuredMockExamView: View {
     @State private var secondsRemaining = 110 * 60
     @State private var timerActive = false
     @State private var timer: Timer?
-    @State private var selfMarks: [Int] = Array(repeating: 0, count: FullPaper3Mock.questions.count)
+    @State private var pointMarks: [[Bool]] = FullPaper3Mock.questions.map { Array(repeating: false, count: $0.markingPoints.count) }
 
     private var totalMarks: Int { FullPaper3Mock.totalMarks }
+    private var selfMarks: [Int] { pointMarks.map { $0.filter { $0 }.count } }
     private var awardedMarks: Int { selfMarks.reduce(0, +) }
     private var currentQuestion: FullPaper3MockQuestion { FullPaper3Mock.questions[currentIndex] }
 
@@ -228,7 +229,7 @@ struct StructuredMockExamView: View {
                         .foregroundStyle(.green)
                     Text("Examination Complete")
                         .font(.largeTitle.bold())
-                    Text("Self-assessed score: \(awardedMarks) / \(totalMarks)")
+                    Text("Marked score: \(awardedMarks) / \(totalMarks)")
                         .font(.title3.weight(.semibold))
                     Text("Paper 3-style practice · 40 marks")
                         .font(.caption)
@@ -237,10 +238,10 @@ struct StructuredMockExamView: View {
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 10)
 
-                Text("Mark your answers")
+                Text("Mark each criterion")
                     .font(.headline)
 
-                Text("Compare each response with the marking points below. Award yourself only for points you actually included in your answer.")
+                Text("Each marking point is one criterion. Tick a point only when your answer contains that specific idea. This produces a transparent self-mark rather than a keyword-based automatic mark.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
 
@@ -286,21 +287,26 @@ struct StructuredMockExamView: View {
             Text("Marking points")
                 .font(.caption.bold())
                 .foregroundStyle(.secondary)
-            ForEach(Array(question.markingPoints.enumerated()), id: \.offset) { _, point in
-                HStack(alignment: .top, spacing: 7) {
-                    Image(systemName: "circle.fill")
-                        .font(.system(size: 5))
-                        .padding(.top, 5)
-                    Text(point)
-                        .font(.caption)
+            ForEach(Array(question.markingPoints.enumerated()), id: \.offset) { pointIndex, point in
+                Button {
+                    pointMarks[index][pointIndex].toggle()
+                } label: {
+                    HStack(alignment: .top, spacing: 10) {
+                        Image(systemName: pointMarks[index][pointIndex] ? "checkmark.circle.fill" : "circle")
+                            .foregroundStyle(pointMarks[index][pointIndex] ? .green : .secondary)
+                        Text(point)
+                            .font(.caption)
+                            .foregroundStyle(.primary)
+                            .multilineTextAlignment(.leading)
+                        Spacer(minLength: 0)
+                    }
                 }
+                .buttonStyle(.plain)
             }
 
-            Stepper("Award marks: \(selfMarks[index]) / \(question.marks)", value: Binding(
-                get: { selfMarks[index] },
-                set: { selfMarks[index] = min(max($0, 0), question.marks) }
-            ), in: 0...question.marks)
-            .font(.caption.weight(.semibold))
+            Text("Awarded: \(selfMarks[index]) / \(question.markingPoints.count) criteria")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.secondary)
         }
         .padding(15)
         .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 14))
@@ -370,7 +376,7 @@ struct StructuredMockExamView: View {
         submitted = false
         currentIndex = 0
         userAnswers = Array(repeating: "", count: FullPaper3Mock.questions.count)
-        selfMarks = Array(repeating: 0, count: FullPaper3Mock.questions.count)
+        pointMarks = FullPaper3Mock.questions.map { Array(repeating: false, count: $0.markingPoints.count) }
         secondsRemaining = 110 * 60
     }
 }

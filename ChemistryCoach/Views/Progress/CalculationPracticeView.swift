@@ -21,7 +21,7 @@ struct CalculationPracticeView: View {
     @State private var userAnswers: [String: String] = [:]
     @State private var checkedCorrect: [String: Bool] = [:]
 
-    init(curriculum: Curriculum = .general) {
+    init(curriculum: Curriculum = .singapore) {
         self.curriculum = curriculum
     }
 

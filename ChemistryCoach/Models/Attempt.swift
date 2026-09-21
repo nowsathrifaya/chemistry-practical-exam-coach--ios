@@ -25,6 +25,14 @@ final class Attempt: Identifiable, @unchecked Sendable {
     var score: Int
     var maxScore: Int
     var feedback: String
+    // Optional so existing SwiftData stores can migrate without requiring a
+    // destructive reset. These fields power skill-level readiness and error
+    // diagnosis in newer versions of the coach.
+    var skillRaw: String?
+    var errorTypeRaw: String?
+    var durationSeconds: Int?
+    var hintsUsed: Int?
+    var confidence: Int?
 
     init(
         id: String = UUID().uuidString,
@@ -35,7 +43,12 @@ final class Attempt: Identifiable, @unchecked Sendable {
         completedAt: Date,
         score: Int,
         maxScore: Int,
-        feedback: String
+        feedback: String,
+        skill: PracticalSkill? = nil,
+        errorType: PracticalErrorType? = nil,
+        durationSeconds: Int? = nil,
+        hintsUsed: Int? = nil,
+        confidence: Int? = nil
     ) {
         self.id = id
         self.curriculum = curriculum.rawValue
@@ -46,8 +59,24 @@ final class Attempt: Identifiable, @unchecked Sendable {
         self.score = score
         self.maxScore = maxScore
         self.feedback = feedback
+        self.skillRaw = skill?.rawValue
+        self.errorTypeRaw = errorType?.rawValue
+        self.durationSeconds = durationSeconds
+        self.hintsUsed = hintsUsed
+        self.confidence = confidence
     }
 
     var curriculumValue: Curriculum? { Curriculum(rawValue: curriculum) }
     var modeValue: AttemptMode? { AttemptMode(rawValue: mode) }
+    var skillValue: PracticalSkill? { skillRaw.flatMap(PracticalSkill.init(rawValue:)) }
+    var errorTypeValue: PracticalErrorType? { errorTypeRaw.flatMap(PracticalErrorType.init(rawValue:)) }
 }
+
+#if DEBUG
+extension ModelContainer {
+    static var preview: ModelContainer {
+        do { return try ModelContainer(for: Attempt.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true)) }
+        catch { fatalError("Preview container failed: \(error)") }
+    }
+}
+#endif

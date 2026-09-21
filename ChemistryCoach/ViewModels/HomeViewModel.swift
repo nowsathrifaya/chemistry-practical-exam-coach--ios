@@ -17,7 +17,7 @@ final class HomeViewModel {
     private let preferences: UserPreferences
     private let attemptRepository: AttemptRepository
 
-    var curriculum: Curriculum = .general
+    var curriculum: Curriculum = .singapore
     var onboardingComplete: Bool?
     private(set) var attempts: [Attempt] = []
 
@@ -29,7 +29,7 @@ final class HomeViewModel {
     init(preferences: UserPreferences, attemptRepository: AttemptRepository) {
         self.preferences = preferences
         self.attemptRepository = attemptRepository
-        self.curriculum = preferences.selectedCurriculum ?? .general
+        self.curriculum = preferences.selectedCurriculum ?? .singapore
         self.onboardingComplete = preferences.hasCompletedOnboarding
         refreshStats()
     }
