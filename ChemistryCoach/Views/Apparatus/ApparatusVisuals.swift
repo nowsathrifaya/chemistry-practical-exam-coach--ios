@@ -4,6 +4,11 @@ struct ChemistryInstrumentView: View {
     let state: ApparatusVisualState
     let type: ApparatusType
     var body: some View {
+        // GeometryReader has no intrinsic size of its own, so without an
+        // explicit frame here it collapses to zero height inside a
+        // ScrollView/VStack and the whole drawing is invisible — that's
+        // why the apparatus wasn't showing up at all. A fixed height
+        // gives the Canvas somewhere to actually draw.
         GeometryReader { geo in
             Canvas { context, size in
                 drawBackground(&context, size: size)
@@ -19,6 +24,8 @@ struct ChemistryInstrumentView: View {
                 }
             }.accessibilityLabel("Interactive \(type.label) showing a reading")
         }
+        .frame(height: 300)
+        .frame(maxWidth: .infinity)
         .padding(12)
     }
 

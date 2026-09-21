@@ -96,3 +96,9 @@ The project uses SwiftUI, SwiftData, iOS 17+, no backend, no account, and no net
 - Paper 2 structured/data-based question engine
 - full 6092 revision planner
 - App Store purchase / entitlement layer
+
+
+Revision materials bundle fix: the XcodeGen project explicitly includes ChemistryCoach/Resources/RevisionMaterials so the 10 .txt revision packs are copied into the app bundle.
+
+## v9 simulation progression fix
+Incorrect instrument readings/end-point decisions are now treated as scored mistakes rather than hard stops. In particular, after a titration endpoint is recorded—even if it is early or overshot—the practical workflow advances to the measured stage and the student can continue to the next attempt. The recorded reading remains in the data/history and is used for feedback; the app does not require a correct reading to proceed.

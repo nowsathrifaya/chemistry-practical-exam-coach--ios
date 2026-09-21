@@ -49,7 +49,7 @@ struct PracticeHubView: View {
                 NavigationLink {
                     StructuredMockExamView()
                 } label: {
-                    Label("Structured mock exam", systemImage: "doc.text.fill")
+                    Label("Full Paper 3 mock · 40 marks · 1h 50m", systemImage: "doc.text.fill")
                 }
                 NavigationLink {
                     MockPracticalView(curriculum: homeViewModel.curriculum)

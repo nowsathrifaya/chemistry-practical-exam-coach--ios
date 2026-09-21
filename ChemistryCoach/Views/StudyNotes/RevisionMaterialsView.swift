@@ -32,7 +32,29 @@ private struct RevisionMaterialReader: View {
         .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Done") { dismiss() } } }
     }
     private var content: String {
-        guard let url = Bundle.main.url(forResource: material.fileName, withExtension: "txt", subdirectory: "RevisionMaterials"), let text = try? String(contentsOf: url) else { return "Material unavailable." }
-        return text
+        // RevisionMaterials is explicitly bundled by project.yml.
+        // Keep the lookup resilient to bundle/subdirectory differences.
+        if let url = Bundle.main.url(
+            forResource: material.fileName,
+            withExtension: "txt",
+            subdirectory: "RevisionMaterials"
+        ), let text = try? String(contentsOf: url, encoding: .utf8) {
+            return text
+        }
+
+        // Fallback for bundles that flatten the resource folder.
+        if let url = Bundle.main.url(
+            forResource: material.fileName,
+            withExtension: "txt"
+        ), let text = try? String(contentsOf: url, encoding: .utf8) {
+            return text
+        }
+
+        return """
+        This revision material could not be loaded from the app bundle.
+
+        Please rebuild the app after regenerating the Xcode project so the
+        RevisionMaterials resource folder is included.
+        """
     }
 }

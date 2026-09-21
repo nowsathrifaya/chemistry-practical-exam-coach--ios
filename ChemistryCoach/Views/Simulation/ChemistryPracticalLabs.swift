@@ -724,7 +724,10 @@ final class ChemistryLabViewModel: ObservableObject {
         titrationRecords.append(record)
         readings.append(LabReading(trialNumber: readings.count + 1, label: "\(record.mode.rawValue) titre (\(outcome))", value: record.titre, unit: "cm³"))
         observedChanges.append("\(outcome): titre = \(String(format: "%.2f", record.titre)) cm³")
-        actionState = .observing
+        // A wrong endpoint is a scored practical mistake, not a dead end.
+        // Move the workflow forward so the student can refill and continue with
+        // the next attempt / calculation using the reading they actually took.
+        actionState = .measured
         return outcome
     }
 
@@ -1241,7 +1244,9 @@ struct ChemistryPracticalLabView: View {
                         .disabled(model.titrationLastOutcome != nil)
                     Button("This is the endpoint") { _ = model.confirmEndpoint() }
                         .buttonStyle(.bordered).disabled(model.buretteReading == model.titrationInitialReading || model.titrationLastOutcome != nil)
-                    Button("Refill burette") { model.refillBurette() }.buttonStyle(.bordered).disabled(model.titrationTapOpen)
+                    Button(model.titrationLastOutcome == nil ? "Refill burette" : "Continue to next attempt") { model.refillBurette() }
+                        .buttonStyle(.bordered)
+                        .disabled(model.titrationTapOpen)
                 }
                 if let outcome = model.titrationLastOutcome {
                     Text(outcome).font(.caption.weight(.semibold)).foregroundStyle(outcome == "Endpoint detected" ? .green : .orange)

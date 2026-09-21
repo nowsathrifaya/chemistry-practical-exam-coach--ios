@@ -2,309 +2,524 @@
 //  StructuredMockExamView.swift
 //  ChemistryCoach
 //
-//  Interactive structured mock exam with 5 Paper 3 style questions.
-//  Students attempt each question, then reveal the model answer and
-//  self-assess against marking points.
+//  Full-length original Paper 3-style mock for Singapore-Cambridge
+//  O-Level Chemistry (6092). Structure follows the 2026 syllabus:
+//  40 marks, 1 h 50 min, compulsory practical questions, with Planning
+//  forming about 15% of the paper and MMO/PDO/ACE the remaining 85%.
+//
+//  This is original practice content, not copied examination material.
 //
 
 import SwiftUI
 
 struct StructuredMockExamView: View {
+    @State private var started = false
     @State private var currentIndex = 0
-    @State private var userAnswers: [String] = Array(repeating: "", count: StructuredMockExam.questions.count)
-    @State private var revealedAnswers = Set<Int>()
-    @State private var selfMarks: [Int] = Array(repeating: 0, count: StructuredMockExam.questions.count)
+    @State private var userAnswers: [String] = Array(repeating: "", count: FullPaper3Mock.questions.count)
     @State private var submitted = false
+    @State private var showSubmitConfirmation = false
+    @State private var secondsRemaining = 110 * 60
+    @State private var timerActive = false
+    @State private var timer: Timer?
+    @State private var selfMarks: [Int] = Array(repeating: 0, count: FullPaper3Mock.questions.count)
 
-    private var totalMarks: Int { StructuredMockExam.questions.reduce(0) { $0 + $1.marks } }
+    private var totalMarks: Int { FullPaper3Mock.totalMarks }
     private var awardedMarks: Int { selfMarks.reduce(0, +) }
+    private var currentQuestion: FullPaper3MockQuestion { FullPaper3Mock.questions[currentIndex] }
 
     var body: some View {
+        Group {
+            if !started {
+                instructionsView
+            } else if submitted {
+                resultView
+            } else {
+                examView
+            }
+        }
+        .navigationTitle("Paper 3 Mock Examination")
+        .navigationBarTitleDisplayMode(.inline)
+        .onDisappear { stopTimer() }
+        .alert("Submit examination?", isPresented: $showSubmitConfirmation) {
+            Button("Continue Exam", role: .cancel) { }
+            Button("Submit", role: .destructive) { submitExam() }
+        } message: {
+            Text("Once submitted, the timed attempt will end. You can then compare your answers with the marking points.")
+        }
+    }
+
+    // MARK: - Instructions
+
+    private var instructionsView: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                // Header
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Structured Mock Exam")
+            VStack(alignment: .leading, spacing: 22) {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("GCE O-Level Chemistry")
+                        .font(.headline)
+                        .foregroundStyle(.secondary)
+                    Text("Paper 3 · Practical Mock Examination")
                         .font(.largeTitle.bold())
-                    Text("Paper 3 style · \(totalMarks) marks · ~110 minutes")
-                        .font(.subheadline)
+                    HStack(spacing: 14) {
+                        Label("40 marks", systemImage: "checkmark.circle")
+                        Label("1 h 50 min", systemImage: "timer")
+                    }
+                    .font(.subheadline.weight(.semibold))
+                }
+
+                infoCard(title: "Before you begin", icon: "doc.text.fill") {
+                    bullet("This is a full-length original Paper 3-style practice paper.")
+                    bullet("All questions are compulsory.")
+                    bullet("Suggested examination time: 1 hour 50 minutes.")
+                    bullet("Do not use your notes or revision materials during the attempt if you want a realistic simulation.")
+                    bullet("Write calculations clearly and include units where appropriate.")
+                    bullet("For observations, describe what you would actually see rather than writing an inference.")
+                }
+
+                infoCard(title: "Paper structure", icon: "list.number") {
+                    structureRow("Question 1", "Titration", 10)
+                    structureRow("Question 2", "Rate investigation + data", 8)
+                    structureRow("Question 3", "Qualitative analysis", 8)
+                    structureRow("Question 4", "Salt preparation + separation", 7)
+                    structureRow("Question 5", "Energetics + electrolysis", 7)
+                    Divider()
+                    structureRow("Total", "Compulsory questions", 40)
+                }
+
+                infoCard(title: "Skills assessed", icon: "flask.fill") {
+                    Text("Planning (P) ≈ 6 marks · MMO/PDO/ACE ≈ 34 marks")
+                        .font(.subheadline.weight(.semibold))
+                    Text("The mock uses the Paper 3 skill areas: Planning, Manipulation/Measurement/Observation, Presentation of Data/Observations, and Analysis/Conclusions/Evaluation.")
+                        .font(.caption)
                         .foregroundStyle(.secondary)
                 }
 
-                // Progress
-                ProgressView(value: Double(currentIndex + 1), total: Double(StructuredMockExam.questions.count))
-                Text("Question \(currentIndex + 1) of \(StructuredMockExam.questions.count)")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                Button {
+                    startExam()
+                } label: {
+                    Label("Begin 1 h 50 min examination", systemImage: "play.fill")
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
+            }
+            .padding(20)
+        }
+    }
 
-                // Current question
-                let question = StructuredMockExam.questions[currentIndex]
+    // MARK: - Examination
 
-                VStack(alignment: .leading, spacing: 14) {
-                    HStack {
-                        Text(question.title)
+    private var examView: some View {
+        VStack(spacing: 0) {
+            timerHeader
+            ProgressView(value: Double(currentIndex + 1), total: Double(FullPaper3Mock.questions.count))
+                .padding(.horizontal)
+                .padding(.top, 8)
+
+            ScrollViewReader { proxy in
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 18) {
+                        HStack {
+                            Text("Question \(currentIndex + 1) of \(FullPaper3Mock.questions.count)")
+                                .font(.headline)
+                            Spacer()
+                            Text("\(currentQuestion.marks) marks")
+                                .font(.caption.bold())
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 5)
+                                .background(Color.orange.opacity(0.14), in: Capsule())
+                        }
+
+                        Text(currentQuestion.title)
+                            .font(.title2.bold())
+
+                        Text(currentQuestion.questionText)
+                            .font(.body)
+                            .textSelection(.enabled)
+
+                        Text("Your answer")
                             .font(.headline)
-                        Spacer()
-                        Text("\(question.marks) marks")
-                            .font(.caption.bold())
-                            .foregroundStyle(.orange)
-                    }
 
-                    Text(question.questionText)
+                        TextEditor(text: Binding(
+                            get: { userAnswers[currentIndex] },
+                            set: { userAnswers[currentIndex] = $0 }
+                        ))
                         .font(.body)
+                        .frame(minHeight: 300)
+                        .padding(8)
+                        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12))
+                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(.secondary.opacity(0.35)))
 
-                    TextEditor(text: Binding(
-                        get: { userAnswers[currentIndex] },
-                        set: { userAnswers[currentIndex] = $0 }
-                    ))
-                    .frame(minHeight: 120)
-                    .overlay(RoundedRectangle(cornerRadius: 10).stroke(.secondary, lineWidth: 0.5))
-
-                    if revealedAnswers.contains(currentIndex) {
-                        VStack(alignment: .leading, spacing: 10) {
-                            HStack {
-                                Image(systemName: "checkmark.seal.fill")
-                                    .foregroundStyle(.green)
-                                Text("Model answer")
-                                    .font(.headline)
-                            }
-
-                            Text(question.modelAnswer)
-                                .font(.subheadline)
-
-                            if !question.markingPoints.isEmpty {
-                                Text("Marking points:")
-                                    .font(.caption.bold())
-                                    .foregroundStyle(.secondary)
-                                ForEach(Array(question.markingPoints.enumerated()), id: \.offset) { _, point in
-                                    HStack(alignment: .top, spacing: 6) {
-                                        Image(systemName: "circle.fill")
-                                            .font(.system(size: 5))
-                                            .foregroundStyle(.green)
-                                            .padding(.top, 5)
-                                        Text(point)
-                                            .font(.caption)
-                                    }
-                                }
-                            }
-
-                            VStack(alignment: .leading, spacing: 6) {
-                                Text("Self-assessment: \(selfMarks[currentIndex]) / \(question.marks) marks")
-                                    .font(.caption.bold())
-                                Stepper("Award marks: \(selfMarks[currentIndex]) / \(question.marks)",
-                                        value: Binding(
-                                            get: { selfMarks[currentIndex] },
-                                            set: { selfMarks[currentIndex] = min(max($0, 0), question.marks) }
-                                        ),
-                                        in: 0...question.marks)
-                                    .font(.caption)
-                            }
-                        }
-                        .padding(14)
-                        .background(Color.green.opacity(0.08), in: RoundedRectangle(cornerRadius: 12))
-
-                        Button("Hide answer") { revealedAnswers.remove(currentIndex) }
-                            .font(.caption)
-                    } else {
-                        Button("Reveal model answer") { revealedAnswers.insert(currentIndex) }
-                            .buttonStyle(.bordered)
-                    }
-                }
-                .padding(16)
-                .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 16))
-
-                // Navigation
-                HStack {
-                    Button("Previous") {
-                        if currentIndex > 0 { currentIndex -= 1 }
-                    }
-                    .disabled(currentIndex == 0)
-                    .buttonStyle(.bordered)
-
-                    Spacer()
-
-                    if currentIndex < StructuredMockExam.questions.count - 1 {
-                        Button("Next question") { currentIndex += 1 }
-                            .buttonStyle(.borderedProminent)
-                    } else {
-                        Button("Submit exam") {
-                            submitted = true
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .tint(.green)
-                    }
-                }
-
-                if submitted {
-                    VStack(spacing: 8) {
-                        Text("Exam complete")
-                            .font(.title.bold())
-                        Text("Your self-assessed score: \(awardedMarks) / \(totalMarks) marks")
-                            .font(.headline)
-                        Text("Review the questions you scored lowest on and revisit the corresponding revision materials.")
+                        Text("Tip: You may answer all sub-parts in the same box. Label your answers (a), (b), (c)… clearly.")
                             .font(.caption)
                             .foregroundStyle(.secondary)
 
-                        Button("Restart") {
-                            currentIndex = 0
-                            userAnswers = Array(repeating: "", count: StructuredMockExam.questions.count)
-                            revealedAnswers.removeAll()
-                            selfMarks = Array(repeating: 0, count: StructuredMockExam.questions.count)
-                            submitted = false
+                        HStack(spacing: 10) {
+                            Button {
+                                if currentIndex > 0 {
+                                    currentIndex -= 1
+                                    proxy.scrollTo("top", anchor: .top)
+                                }
+                            } label: {
+                                Label("Previous", systemImage: "chevron.left")
+                            }
+                            .buttonStyle(.bordered)
+                            .disabled(currentIndex == 0)
+
+                            Spacer()
+
+                            if currentIndex < FullPaper3Mock.questions.count - 1 {
+                                Button {
+                                    currentIndex += 1
+                                    proxy.scrollTo("top", anchor: .top)
+                                } label: {
+                                    Label("Next", systemImage: "chevron.right")
+                                }
+                                .buttonStyle(.borderedProminent)
+                            } else {
+                                Button("Finish & Submit") {
+                                    showSubmitConfirmation = true
+                                }
+                                .buttonStyle(.borderedProminent)
+                                .tint(.green)
+                            }
                         }
-                        .buttonStyle(.bordered)
                     }
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .background(Color.blue.opacity(0.08), in: RoundedRectangle(cornerRadius: 16))
+                    .id("top")
+                    .padding(20)
                 }
             }
-            .padding()
         }
-        .navigationTitle("Structured Mock Exam")
-        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(true)
+    }
+
+    private var timerHeader: some View {
+        HStack(spacing: 12) {
+            Image(systemName: secondsRemaining <= 300 ? "exclamationmark.triangle.fill" : "timer")
+                .foregroundStyle(secondsRemaining <= 300 ? .red : .primary)
+            Text(timeString)
+                .font(.system(.headline, design: .monospaced).weight(.bold))
+                .foregroundStyle(secondsRemaining <= 300 ? .red : .primary)
+            Spacer()
+            Text("Paper 3 · 40 marks")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.secondary)
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 10)
+        .background(.bar)
+    }
+
+    private var timeString: String {
+        let hours = secondsRemaining / 3600
+        let minutes = (secondsRemaining % 3600) / 60
+        let seconds = secondsRemaining % 60
+        return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
+    }
+
+    // MARK: - Results
+
+    private var resultView: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 18) {
+                VStack(spacing: 8) {
+                    Image(systemName: "checkmark.seal.fill")
+                        .font(.system(size: 44))
+                        .foregroundStyle(.green)
+                    Text("Examination Complete")
+                        .font(.largeTitle.bold())
+                    Text("Self-assessed score: \(awardedMarks) / \(totalMarks)")
+                        .font(.title3.weight(.semibold))
+                    Text("Paper 3-style practice · 40 marks")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 10)
+
+                Text("Mark your answers")
+                    .font(.headline)
+
+                Text("Compare each response with the marking points below. Award yourself only for points you actually included in your answer.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+
+                ForEach(FullPaper3Mock.questions.indices, id: \.self) { index in
+                    resultQuestionCard(index: index)
+                }
+
+                Button("Attempt the full paper again") {
+                    resetExam()
+                }
+                .buttonStyle(.borderedProminent)
+                .frame(maxWidth: .infinity)
+            }
+            .padding(20)
+        }
+        .navigationBarBackButtonHidden(false)
+    }
+
+    private func resultQuestionCard(index: Int) -> some View {
+        let question = FullPaper3Mock.questions[index]
+        return VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("Question \(index + 1)")
+                    .font(.headline)
+                Spacer()
+                Text("\(selfMarks[index]) / \(question.marks)")
+                    .font(.headline)
+                    .foregroundStyle(selfMarks[index] == question.marks ? .green : .primary)
+            }
+
+            Text(question.title)
+                .font(.subheadline.weight(.semibold))
+
+            Text("Your answer")
+                .font(.caption.bold())
+                .foregroundStyle(.secondary)
+            Text(userAnswers[index].isEmpty ? "No answer entered." : userAnswers[index])
+                .font(.caption)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(10)
+                .background(Color(.tertiarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 8))
+
+            Text("Marking points")
+                .font(.caption.bold())
+                .foregroundStyle(.secondary)
+            ForEach(Array(question.markingPoints.enumerated()), id: \.offset) { _, point in
+                HStack(alignment: .top, spacing: 7) {
+                    Image(systemName: "circle.fill")
+                        .font(.system(size: 5))
+                        .padding(.top, 5)
+                    Text(point)
+                        .font(.caption)
+                }
+            }
+
+            Stepper("Award marks: \(selfMarks[index]) / \(question.marks)", value: Binding(
+                get: { selfMarks[index] },
+                set: { selfMarks[index] = min(max($0, 0), question.marks) }
+            ), in: 0...question.marks)
+            .font(.caption.weight(.semibold))
+        }
+        .padding(15)
+        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 14))
+    }
+
+    // MARK: - Helpers
+
+    private func infoCard<Content: View>(title: String, icon: String, @ViewBuilder content: () -> Content) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Label(title, systemImage: icon)
+                .font(.headline)
+            content()
+        }
+        .padding(16)
+        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 16))
+    }
+
+    private func bullet(_ text: String) -> some View {
+        HStack(alignment: .top, spacing: 8) {
+            Text("•")
+            Text(text)
+        }
+        .font(.subheadline)
+    }
+
+    private func structureRow(_ number: String, _ topic: String, _ marks: Int) -> some View {
+        HStack {
+            Text(number).font(.subheadline.weight(.semibold))
+            Text(topic).font(.subheadline)
+            Spacer()
+            Text("\(marks)")
+                .font(.caption.bold())
+                .frame(width: 32)
+        }
+    }
+
+    private func startExam() {
+        started = true
+        submitted = false
+        secondsRemaining = 110 * 60
+        timerActive = true
+        timer?.invalidate()
+        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
+            guard timerActive else { return }
+            if secondsRemaining > 0 {
+                secondsRemaining -= 1
+            } else {
+                submitExam()
+            }
+        }
+    }
+
+    private func stopTimer() {
+        timer?.invalidate()
+        timer = nil
+        timerActive = false
+    }
+
+    private func submitExam() {
+        stopTimer()
+        submitted = true
+    }
+
+    private func resetExam() {
+        stopTimer()
+        started = false
+        submitted = false
+        currentIndex = 0
+        userAnswers = Array(repeating: "", count: FullPaper3Mock.questions.count)
+        selfMarks = Array(repeating: 0, count: FullPaper3Mock.questions.count)
+        secondsRemaining = 110 * 60
     }
 }
 
-// MARK: - Question Data
+// MARK: - Original full Paper 3 mock content
 
-struct StructuredMockQuestion: Identifiable {
+struct FullPaper3MockQuestion: Identifiable {
     let id: Int
     let title: String
     let marks: Int
     let questionText: String
-    let modelAnswer: String
     let markingPoints: [String]
 }
 
-enum StructuredMockExam {
-    static let questions: [StructuredMockQuestion] = [
-        .init(
-            id: 0,
-            title: "1. Titration (MMO + PDO + ACE)",
-            marks: 12,
-            questionText: """
-            A student carries out a titration to find the concentration of sulfuric acid (H₂SO₄) using a standard solution of 0.100 mol/dm³ sodium hydroxide (NaOH).
+enum FullPaper3Mock {
+    static let questions: [FullPaper3MockQuestion] = [
+        .init(id: 1, title: "Titration — measurement, data and calculation", marks: 10, questionText: """
+QUESTION 1
 
-            (a) Describe how to prepare 250 cm³ of 0.100 mol/dm³ NaOH from solid. [3]
-            (b) The student uses 25.0 cm³ of NaOH per titration. How is this measured accurately? [1]
-            (c) Titration results: 23.50, 23.20, 23.15, 23.30 cm³ (initial = 0.00). Identify concordant titres and calculate the mean. [2]
-            (d) H₂SO₄ + 2NaOH → Na₂SO₄ + 2H₂O. Calculate the concentration of H₂SO₄. [4]
-            (e) Give two sources of error and how each is minimised. [2]
-            """,
-            modelAnswer: """
-            (a) Weigh 1.00 g NaOH (0.100 × 0.250 × 40 = 1.00 g). Dissolve in distilled water in a beaker. Transfer to a 250 cm³ volumetric flask, washing the beaker into the flask. Make up to the mark with distilled water. Stopper and invert to mix.
-            (b) Use a 25.0 cm³ pipette with a pipette filler.
-            (c) Concordant: 23.20, 23.15, 23.30 cm³ (all within 0.20 cm³). 23.50 is a rough titre. Mean = (23.20 + 23.15 + 23.30) / 3 = 23.22 cm³. (Accept 23.18 using tightest pair.)
-            (d) Moles NaOH = 0.100 × 0.0250 = 0.00250 mol. Mole ratio 1:2, so moles H₂SO₄ = 0.00125 mol. Volume = 23.22 cm³ = 0.02322 dm³. Concentration = 0.00125 / 0.02322 = 0.0538 mol/dm³.
-            (e) Parallax error — read burette at eye level, bottom of meniscus. Not rinsing burette with titrant — rinse with the solution it will contain. Adding too fast near endpoint — add dropwise.
-            """,
-            markingPoints: [
-                "(a) Correct mass calculation (1.00 g); use of volumetric flask; wash beaker into flask; make up to mark; mix",
-                "(b) Pipette (25.0 cm³) with pipette filler",
-                "(c) Identify 23.20, 23.15, 23.30 as concordant; 23.50 as rough; correct mean calculation",
-                "(d) Balanced equation; moles NaOH = 0.00250; divide by 2 for H₂SO₄; convert cm³ to dm³; final concentration",
-                "(e) Two specific errors with matching minimisations"
-            ]
-        ),
-        .init(
-            id: 1,
-            title: "2. Qualitative Analysis (MMO + ACE)",
-            marks: 10,
-            questionText: """
-            You are given two solid samples, P and Q.
+A student uses a standard solution of 0.100 mol dm⁻³ sodium hydroxide to determine the concentration of hydrochloric acid.
 
-            Solid P: Flame test gives yellow flame. Adding dilute HNO₃ produces effervescence; gas turns limewater milky.
-            Solid Q: Adding dilute HNO₃ then AgNO₃ gives white precipitate. Adding NaOH gives light blue precipitate, insoluble in excess.
+(a) State the apparatus used to transfer exactly 25.0 cm³ of the hydrochloric acid into a conical flask. [1]
 
-            (a) Identify P and give the ion tests. [3]
-            (b) Identify Q and give the ion tests. [3]
-            (c) Explain why nitric acid is used (not HCl) before adding AgNO₃. [1]
-            (d) Write the ionic equation for the silver nitrate test. [1]
-            (e) Give one common mistake students make in QA recording. [2]
-            """,
-            modelAnswer: """
-            (a) P = Sodium carbonate (Na₂CO₃). Na⁺ identified by yellow flame test. CO₃²⁻ identified by adding dilute acid → effervescence → CO₂ turns limewater milky.
-            (b) Q = Copper(II) chloride (CuCl₂). Cu²⁺ identified by light blue precipitate with NaOH, insoluble in excess. Cl⁻ identified by white precipitate with acidified AgNO₃.
-            (c) HCl contains Cl⁻ ions which would give a false positive white precipitate with AgNO₃. HNO₃ does not interfere because all nitrates are soluble.
-            (d) Ag⁺(aq) + Cl⁻(aq) → AgCl(s)
-            (e) Writing an inference as an observation. "Chloride ion present" is an inference; "white precipitate formed" is the observation. Record what you SEE first, then state the inference.
-            """,
-            markingPoints: [
-                "(a) Yellow flame → Na⁺; acid + gas test → CO₃²⁻; name as sodium carbonate",
-                "(b) Blue ppt with NaOH → Cu²⁺; white ppt with AgNO₃ → Cl⁻; name as copper(II) chloride",
-                "(c) HCl introduces Cl⁻ → false positive; HNO₃ does not interfere",
-                "(d) Ag⁺ + Cl⁻ → AgCl(s)",
-                "(e) Distinguish observation from inference with example"
-            ]
-        ),
-        .init(
-            id: 2,
-            title: "3. Planning — Rate of Reaction",
-            marks: 6,
-            questionText: """
-            Plan an experiment to investigate how temperature affects the rate of reaction between sodium thiosulfate and hydrochloric acid.
-            Na₂S₂O₃ + 2HCl → 2NaCl + S + H₂O + SO₂
+(b) State how the burette should be prepared before the titration. Include the solution used for rinsing. [2]
 
-            (a) State the independent, dependent, and two controlled variables. [2]
-            (b) Describe the procedure. [3]
-            (c) State one safety precaution. [1]
-            """,
-            modelAnswer: """
-            (a) IV: Temperature of reaction mixture (e.g. 20, 30, 40, 50, 60°C). DV: Time for cross beneath flask to disappear (s). CVs: Volume and concentration of Na₂S₂O₃ and HCl; same flask; same cross.
-            (b) 1. Measure 50 cm³ Na₂S₂O₃ into conical flask over a cross. 2. Heat to desired temperature using water bath; check with thermometer. 3. Measure 10 cm³ HCl. 4. Add HCl, start stopwatch immediately. 5. Look down at cross; stop timer when cross disappears. 6. Record time. 7. Repeat at different temperatures. 8. Repeat each temperature and calculate mean.
-            (c) SO₂ is produced — irritating to respiratory system. Work in a well-ventilated room or fume cupboard. Wear goggles.
-            """,
-            markingPoints: [
-                "(a) IV: temperature; DV: time for cross to disappear; CVs: volume/concentration/identity of reactants; same apparatus",
-                "(b) Use water bath for temperature control; start timer at mixing; observe cross; repeat; calculate mean",
-                "(c) SO₂ hazard; ventilation or fume cupboard; goggles"
-            ]
-        ),
-        .init(
-            id: 3,
-            title: "4. Energy Changes / Calorimetry",
-            marks: 7,
-            questionText: """
-            A student mixes 50 cm³ of 1.0 mol/dm³ HCl with 50 cm³ of 1.0 mol/dm³ NaOH in a polystyrene cup. Temperature changes from 22.0°C to 28.6°C.
+(c) The initial burette reading is 0.10 cm³. The final readings for four titrations are 23.70 cm³, 23.20 cm³, 23.15 cm³ and 23.25 cm³.
 
-            (a) Calculate the energy released (c = 4.2 J/g/°C, assume 1 cm³ = 1 g). [3]
-            (b) Calculate the enthalpy change per mole of water formed. [2]
-            (c) Give two ways to improve accuracy. [2]
-            """,
-            modelAnswer: """
-            (a) Total mass = 50 + 50 = 100 g. ΔT = 28.6 − 22.0 = 6.6°C. q = m × c × ΔT = 100 × 4.2 × 6.6 = 2772 J = 2.772 kJ.
-            (b) Moles HCl = 1.0 × 0.050 = 0.050 mol. Moles NaOH = 1.0 × 0.050 = 0.050 mol. Mole ratio 1:1, so moles H₂O = 0.050 mol. ΔH = −2.772 / 0.050 = −55.4 kJ/mol (negative = exothermic).
-            (c) Use a lid on the cup to reduce heat loss. Use a digital thermometer for precision. Plot a cooling curve and extrapolate. Insulate further (cotton wool). Stir continuously.
-            """,
-            markingPoints: [
-                "(a) Total mass = 100 g; ΔT = 6.6°C; q = 2772 J = 2.772 kJ",
-                "(b) Moles = 0.050; ΔH = −55.4 kJ/mol; correct sign (negative)",
-                "(c) Two specific improvements with justification"
-            ]
-        ),
-        .init(
-            id: 4,
-            title: "5. Water of Crystallisation",
-            marks: 5,
-            questionText: """
-            5.50 g of hydrated magnesium sulfate (MgSO₄·xH₂O) is heated to constant mass. The anhydrous salt weighs 2.70 g.
-            (Mr: Mg = 24, S = 32, O = 16, H = 1)
+(i) Calculate the titre for each titration. [2]
+(ii) Identify the concordant titres. [1]
+(iii) Calculate the mean concordant titre. Give your answer to 2 decimal places. [1]
 
-            (a) Calculate the mass of water lost. [1]
-            (b) Calculate moles of anhydrous MgSO₄ and moles of water. [2]
-            (c) Determine x and write the formula. [2]
-            """,
-            modelAnswer: """
-            (a) Mass of water = 5.50 − 2.70 = 2.80 g
-            (b) Mr(MgSO₄) = 24 + 32 + (4 × 16) = 120. Moles MgSO₄ = 2.70 / 120 = 0.0225 mol. Mr(H₂O) = 18. Moles H₂O = 2.80 / 18 = 0.1556 mol.
-            (c) x = 0.1556 / 0.0225 = 6.92 ≈ 7. Formula: MgSO₄·7H₂O
-            """,
-            markingPoints: [
-                "(a) Mass water = 2.80 g",
-                "(b) Mr MgSO₄ = 120; moles = 0.0225; Mr H₂O = 18; moles = 0.1556",
-                "(c) Ratio = 6.92 ≈ 7; formula MgSO₄·7H₂O"
-            ]
-        )
+(d) The reaction is:
+HCl + NaOH → NaCl + H₂O
+
+Use the mean titre to calculate the concentration of the hydrochloric acid. Show your working. [2]
+
+(e) State one reason why the rough titre is not included when calculating the mean titre. [1]
+""", markingPoints: [
+            "(a) 25.0 cm³ volumetric pipette with pipette filler.",
+            "(b) Rinse the burette with the solution that will be placed in it, then rinse/fill with the titrant and ensure the jet is filled with solution without bubbles.",
+            "(c)(i) Titrés: 23.60, 23.10, 23.05 and 23.15 cm³.",
+            "(c)(ii) Concordant titres: 23.10, 23.05 and 23.15 cm³.",
+            "(c)(iii) Mean = (23.10 + 23.05 + 23.15) / 3 = 23.10 cm³.",
+            "(d) Moles NaOH = 0.100 × 23.10/1000 = 0.002310 mol. 1:1 ratio, so moles HCl = 0.002310 mol in 25.0 cm³. Concentration = 0.002310/0.0250 = 0.0924 mol dm⁻³.",
+            "(e) A rough titre is only used to locate the end-point approximately and may be affected by overshooting; it is not used for the accurate mean."
+        ]),
+
+        .init(id: 2, title: "Rate of reaction — planning and data analysis", marks: 8, questionText: """
+QUESTION 2
+
+A student investigates the effect of temperature on the rate of reaction between sodium thiosulfate solution and dilute hydrochloric acid. The reaction produces sulfur, making a mark beneath the reaction flask harder to see.
+
+(a) State the independent variable and the dependent variable. [2]
+
+(b) State two variables that must be kept constant for a fair test. [2]
+
+(c) Describe a suitable method for carrying out the investigation at several temperatures. Your method should include how the temperature is controlled and how the reaction time is measured. [2]
+
+(d) The following results were obtained:
+
+Temperature / °C: 20   30   40   50
+Time / s:          96   67   49   36
+
+(i) Which temperature gives the fastest reaction? [1]
+(ii) Explain how the results support the conclusion that increasing temperature increases the rate of reaction. [1]
+""", markingPoints: [
+            "(a) Independent variable: temperature. Dependent variable: time for the cross/mark to disappear (or rate calculated from time).",
+            "(b) Examples: volumes and concentrations of sodium thiosulfate and hydrochloric acid; same apparatus; same viewing method/cross; same total reaction volume.",
+            "(c) Use a water bath to bring reactants to the chosen temperature; mix the same measured volumes/concentrations, start the stopwatch immediately and stop when the cross can no longer be seen; repeat at other temperatures and preferably repeat trials.",
+            "(d)(i) 50 °C.",
+            "(d)(ii) Reaction time decreases as temperature rises (96 s → 36 s), so the reaction is faster at higher temperature."
+        ]),
+
+        .init(id: 3, title: "Qualitative analysis — observations and inference", marks: 8, questionText: """
+QUESTION 3
+
+A solution contains one cation and one anion. The following tests are carried out.
+
+Test 1: Aqueous sodium hydroxide is added. A pale blue precipitate forms and remains insoluble when excess sodium hydroxide is added.
+
+Test 2: Dilute nitric acid is added to a fresh portion of the solution, followed by aqueous silver nitrate. A white precipitate forms.
+
+(a) State the observation in Test 1 and identify the cation. [2]
+
+(b) State the observation in Test 2 and identify the anion. [2]
+
+(c) Explain why dilute nitric acid is used instead of hydrochloric acid before the silver nitrate test. [2]
+
+(d) Write the ionic equation for the reaction producing the precipitate in Test 2. Include state symbols. [1]
+
+(e) State one additional observation that would be useful when recording a qualitative analysis experiment. [1]
+""", markingPoints: [
+            "(a) Pale/light blue precipitate, insoluble in excess NaOH; copper(II), Cu²⁺.",
+            "(b) White precipitate with acidified silver nitrate; chloride, Cl⁻.",
+            "(c) Hydrochloric acid contains chloride ions and could produce a false positive with AgNO₃; nitric acid does not introduce chloride ions.",
+            "(d) Ag⁺(aq) + Cl⁻(aq) → AgCl(s).",
+            "(e) Any valid visible observation such as colour of solution, colour/amount/solubility of precipitate, effervescence, or colour of flame where relevant."
+        ]),
+
+        .init(id: 4, title: "Preparation of a soluble salt — planning and technique", marks: 7, questionText: """
+QUESTION 4
+
+A student needs to prepare a pure, dry sample of copper(II) sulfate crystals from dilute sulfuric acid and copper(II) oxide.
+
+(a) Explain why copper(II) oxide is added in excess. [1]
+
+(b) Describe the procedure from mixing the reactants until the crystals are obtained. Include filtration and crystallisation. [4]
+
+(c) State one reason why the solution should not be evaporated to complete dryness. [1]
+
+(d) State one safety precaution for this experiment. [1]
+""", markingPoints: [
+            "(a) To ensure all sulfuric acid is neutralised/used up so no acid remains in the final solution.",
+            "(b) Warm the dilute sulfuric acid, add copper(II) oxide in small portions with stirring until no more reacts/solid remains; filter to remove excess solid; gently heat the filtrate to concentrate it; allow it to cool so crystals form; filter and dry the crystals.",
+            "(c) Heating to dryness can cause decomposition/splashing and does not give controlled crystallisation; the aim is to crystallise the salt while retaining suitable water for crystallisation.",
+            "(d) Wear eye protection and handle hot acid/solution carefully; any equivalent valid precaution."
+        ]),
+
+        .init(id: 5, title: "Energetics and electrolysis — calculation and evaluation", marks: 7, questionText: """
+QUESTION 5
+
+PART A — Energetics
+
+50.0 cm³ of 1.0 mol dm⁻³ hydrochloric acid is mixed with 50.0 cm³ of 1.0 mol dm⁻³ sodium hydroxide in an insulated cup. The temperature rises from 24.0 °C to 30.2 °C.
+
+(a) Calculate the temperature change. [1]
+
+(b) Assuming the density of the solution is 1.0 g cm⁻³ and its specific heat capacity is 4.2 J g⁻¹ °C⁻¹, calculate the energy released. [2]
+
+(c) State one improvement that would reduce heat loss to the surroundings. [1]
+
+PART B — Electrolysis
+
+Aqueous copper(II) sulfate is electrolysed using copper electrodes.
+
+(d) State the observation at the cathode. [1]
+
+(e) State what happens to the copper anode. [1]
+
+(f) Write the half-equation for the reaction at the cathode. [1]
+""", markingPoints: [
+            "(a) ΔT = 30.2 − 24.0 = 6.2 °C.",
+            "(b) Total mass = 100 g. q = mcΔT = 100 × 4.2 × 6.2 = 2604 J = 2.604 kJ released.",
+            "(c) Use a lid and/or better insulation around the cup; equivalent valid improvement accepted.",
+            "(d) Reddish-brown copper is deposited at the cathode; the cathode gains mass.",
+            "(e) Copper at the anode dissolves/oxidises and the anode loses mass.",
+            "(f) Cu²⁺(aq) + 2e⁻ → Cu(s)."
+        ])
     ]
+
+    static var totalMarks: Int { questions.reduce(0) { $0 + $1.marks } }
 }

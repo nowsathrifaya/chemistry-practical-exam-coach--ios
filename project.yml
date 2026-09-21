@@ -29,6 +29,9 @@ targets:
         excludes:
           - Resources/Info.plist
 
+    resources:
+      - path: ChemistryCoach/Resources/RevisionMaterials
+
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.nowsathrifaya.chemistrycoach
