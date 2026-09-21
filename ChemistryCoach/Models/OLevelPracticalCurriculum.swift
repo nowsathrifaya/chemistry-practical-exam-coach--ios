@@ -1,9 +1,9 @@
 import Foundation
 
-enum PracticalSkill: String, CaseIterable, Identifiable { case safety, apparatus, measurement, observation, recording, graphing, calculation, planning, evaluation, qualitativeAnalysis
+enum CurriculumSkill: String, CaseIterable, Identifiable { case safety, apparatus, measurement, observation, recording, graphing, calculation, planning, evaluation, qualitativeAnalysis
  var id: String { rawValue }
 }
-struct CurriculumTopic: Identifiable, Hashable { let id: String; let title: String; let skills: [PracticalSkill]; let notes: String }
+struct CurriculumTopic: Identifiable, Hashable { let id: String; let title: String; let skills: [CurriculumSkill]; let notes: String }
 struct OLevelPracticalCurriculum {
  static let topics: [CurriculumTopic] = [
   .init(id:"fundamentals",title:"Practical fundamentals",skills:[.safety,.apparatus,.measurement,.recording],notes:"Safety, apparatus choice, units, decimal places, significant figures, accurate scale and meniscus readings, observations versus inferences."),

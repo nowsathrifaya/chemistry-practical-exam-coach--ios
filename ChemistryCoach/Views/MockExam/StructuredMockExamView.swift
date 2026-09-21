@@ -20,7 +20,7 @@ struct StructuredMockExamView: View {
     @State private var showSubmitConfirmation = false
     @State private var secondsRemaining = 110 * 60
     @State private var timerActive = false
-    @State private var timer: Timer?
+    @State private var timerTask: Task<Void, Never>?
     @State private var pointMarks: [[Bool]] = FullPaper3Mock.questions.map { Array(repeating: false, count: $0.markingPoints.count) }
 
     private var totalMarks: Int { FullPaper3Mock.totalMarks }
@@ -348,20 +348,28 @@ struct StructuredMockExamView: View {
         submitted = false
         secondsRemaining = 110 * 60
         timerActive = true
-        timer?.invalidate()
-        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
-            guard timerActive else { return }
-            if secondsRemaining > 0 {
-                secondsRemaining -= 1
-            } else {
-                submitExam()
+        timerTask?.cancel()
+        timerTask = Task { @MainActor in
+            while !Task.isCancelled && timerActive && !submitted {
+                do {
+                    try await Task.sleep(for: .seconds(1))
+                } catch {
+                    return
+                }
+                guard !Task.isCancelled && timerActive && !submitted else { return }
+                if secondsRemaining > 0 {
+                    secondsRemaining -= 1
+                } else {
+                    submitExam()
+                    return
+                }
             }
         }
     }
 
     private func stopTimer() {
-        timer?.invalidate()
-        timer = nil
+        timerTask?.cancel()
+        timerTask = nil
         timerActive = false
     }
 

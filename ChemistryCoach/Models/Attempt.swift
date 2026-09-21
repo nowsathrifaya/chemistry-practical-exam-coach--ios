@@ -72,11 +72,9 @@ final class Attempt: Identifiable, @unchecked Sendable {
     var errorTypeValue: PracticalErrorType? { errorTypeRaw.flatMap(PracticalErrorType.init(rawValue:)) }
 }
 
-#if DEBUG
 extension ModelContainer {
     static var preview: ModelContainer {
         do { return try ModelContainer(for: Attempt.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true)) }
         catch { fatalError("Preview container failed: \(error)") }
     }
 }
-#endif
