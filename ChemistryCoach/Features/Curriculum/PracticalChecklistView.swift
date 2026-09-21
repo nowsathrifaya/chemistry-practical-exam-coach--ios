@@ -18,7 +18,7 @@ struct PracticalChecklistView: View {
                 ForEach(items, id: \.self) { item in
                     Button { if checked.contains(item) { checked.remove(item) } else { checked.insert(item) } } label: {
                         Label(item, systemImage: checked.contains(item) ? "checkmark.circle.fill" : "circle")
-                            .foregroundStyle(checked.contains(item) ? .green : .primary)
+                            .foregroundStyle(checked.contains(item) ? Color.green : Color.primary)
                     }
                     .buttonStyle(.plain)
                 }

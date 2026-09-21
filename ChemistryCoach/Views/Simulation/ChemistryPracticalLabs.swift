@@ -110,6 +110,42 @@ final class ChemistryLabViewModel: ObservableObject {
     @Published var solubilityFilteredExcess: Bool = false
     @Published var solubilityCoolingTemp: Double = 20.0
     @Published var chromatographySolventFront: Double = 0
+
+    // MARK: - Derived animation stages
+    //
+    // LabScenesProcess.swift drives its tweened animations off simple 0...N
+    // stage indices, but the actual student-facing state above is tracked as
+    // granular per-step flags (there was never a single "step" counter) —
+    // these compute the stage index the animation expects from that state.
+
+    /// 0 = filtering/draining, 1 = evaporating/distilling, 2 = complete.
+    var separationStep: Int {
+        switch separationMixtureType {
+        case .saltAndSand:
+            if crystalsObtained { return 2 }
+            if filtered { return 1 }
+            return 0
+        case .immiscibleLiquids:
+            if distillateReady { return 2 }
+            if funnelOutcome != nil { return 1 }
+            return 0
+        }
+    }
+
+    /// 0 = dissolving, 1 = saturated (about to filter), 2 = filtered and
+    /// cooling, 3 = crystallisation result recorded.
+    var solubilityStep: Int {
+        if result != nil { return 3 }
+        if solubilityFilteredExcess { return 2 }
+        if solubilityDeclaredSaturated { return 1 }
+        return 0
+    }
+    /// Alias so the animation's mass-dependent visuals (grain count, etc.)
+    /// read from the same value the student's own UI shows.
+    var solubilityDissolvedMass: Double { solubilityAddedMass }
+    /// True once the final crystallisation result has been recorded — the
+    /// "crystals drying on the filter paper" stage of the animation.
+    var solubilityFiltered: Bool { result != nil }
     // Chromatography realism state (Section 7). chromatographySolventFront is the distance
     // (cm) the solvent has risen ABOVE the baseline — matching the renderer's coordinate system.
     @Published var chromatographyBaselineHeight: Double = 1.0
@@ -1193,7 +1229,7 @@ struct ChemistryPracticalLabView: View {
                 HStack { Text("Initial reading"); Spacer(); Text(String(format: "%.2f cm³", model.titrationInitialReading)).monospacedDigit() }.font(.caption)
                 HStack { Text("Current reading"); Spacer(); Text(String(format: "%.2f cm³", model.buretteReading)).font(.headline.monospacedDigit()).contentTransition(.numericText()).animation(.smooth(duration: 0.25), value: model.buretteReading) }
                 ProgressView(value: model.flaskColourProgress).tint(.pink).animation(.smooth(duration: 0.5), value: model.flaskColourProgress)
-                Text("Flask: \(model.titrationColour.rawValue)").font(.caption.weight(.semibold)).foregroundStyle(model.titrationColour == .overshot ? .red : model.titrationColour == .permanentPink ? .green : .secondary)
+                Text("Flask: \(model.titrationColour.rawValue)").font(.caption.weight(.semibold)).foregroundStyle(model.titrationColour == .overshot ? Color.red : model.titrationColour == .permanentPink ? Color.green : Color.secondary)
 
                 if !model.titrationTapOpen && model.buretteReading == model.titrationInitialReading {
                     Button("Start \(model.titrationMode.rawValue.lowercased()) titration from here") { model.beginTitrationAttempt(mode: model.titrationMode) }
@@ -1392,7 +1428,7 @@ struct ChemistryPracticalLabView: View {
                         HStack { Text("Pour rate"); Slider(value: $model.pourRate, in: 0...1); Text(model.pourRate > 0.7 ? "Fast" : "Steady").font(.caption) }
                         Button("Pour mixture through the filter") { model.pourMixtureThroughFilter() }.buttonStyle(.borderedProminent)
                     } else {
-                        Text(model.pouredTooFast ? "Some solid escaped into the filtrate — it overflowed the paper." : "Residue (sand) is in the filter paper; filtrate (salt solution) is in the beaker.").font(.caption).foregroundStyle(model.pouredTooFast ? .orange : .secondary)
+                        Text(model.pouredTooFast ? "Some solid escaped into the filtrate — it overflowed the paper." : "Residue (sand) is in the filter paper; filtrate (salt solution) is in the beaker.").font(.caption).foregroundStyle(model.pouredTooFast ? Color.orange : Color.secondary)
                         if model.evaporationChoice.isEmpty {
                             Text("How do you recover the salt from the filtrate?").font(.caption.bold())
                             Button("Evaporate until saturated, then cool") { model.chooseEvaporation("Until saturated, then cool") }.buttonStyle(.borderedProminent)
@@ -1428,7 +1464,7 @@ struct ChemistryPracticalLabView: View {
                 if !model.solubilityDeclaredSaturated {
                     Button("Add a portion & stir") { model.addSolidPortion() }.buttonStyle(.borderedProminent)
                     if model.solubilityAddedMass > 0 {
-                        Text(model.solubilityLastPortionDissolved ? "Dissolved completely." : "A little solid remains undissolved even after stirring.").font(.caption).foregroundStyle(model.solubilityLastPortionDissolved ? .secondary : .orange)
+                        Text(model.solubilityLastPortionDissolved ? "Dissolved completely." : "A little solid remains undissolved even after stirring.").font(.caption).foregroundStyle(model.solubilityLastPortionDissolved ? Color.secondary : Color.orange)
                     }
                     Button("This looks saturated — stop here") { model.declareSaturated() }.buttonStyle(.bordered).disabled(model.solubilityAddedMass == 0)
                 } else {

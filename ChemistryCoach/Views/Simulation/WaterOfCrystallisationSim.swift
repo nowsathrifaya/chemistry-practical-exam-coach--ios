@@ -389,7 +389,7 @@ private struct CalculationRow: View {
             Spacer()
             Text(value)
                 .font(highlight ? .headline.monospacedDigit() : .subheadline.monospacedDigit())
-                .foregroundStyle(highlight ? .blue : .primary)
+                .foregroundStyle(highlight ? Color.blue : Color.primary)
         }
     }
 }
