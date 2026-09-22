@@ -18,12 +18,6 @@ workflows:
         XCODE_PROJECT: "ChemistryCoach.xcodeproj"
         XCODE_SCHEME: "ChemistryCoach"
         APP_VERSION: "1.1.0"
-        # Your app's numeric Apple ID (NOT the bundle identifier) — find it in
-        # App Store Connect > My Apps > Chemistry Practical Exam Coach >
-        # General > App Information > Apple ID. Required for the build-number
-        # auto-increment step below; leave blank and that step just falls
-        # back to $BUILD_NUMBER instead of failing.
-        APP_STORE_APP_ID: ""
 
     scripts:
 
@@ -85,7 +79,7 @@ workflows:
           # identifier — falls back to $BUILD_NUMBER (then 2) if that isn't
           # set, or if the lookup fails, e.g. before any build exists yet.
           LATEST_ASC_BUILD_NUMBER=""
-          if [ -n "$APP_STORE_APP_ID" ]; then
+          if [ -n "${APP_STORE_APP_ID:-}" ]; then
             LATEST_ASC_BUILD_NUMBER="$(app-store-connect get-latest-build-number "$APP_STORE_APP_ID" 2>/dev/null || echo "")"
           fi
 
