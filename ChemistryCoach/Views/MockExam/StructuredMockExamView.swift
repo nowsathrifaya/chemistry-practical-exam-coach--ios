@@ -20,7 +20,6 @@ struct StructuredMockExamView: View {
     @State private var showSubmitConfirmation = false
     @State private var secondsRemaining = 110 * 60
     @State private var timerActive = false
-    @State private var examTimerTask: Task<Void, Never>?
     @State private var pointMarks: [[Bool]] = FullPaper3Mock.questions.map { Array(repeating: false, count: $0.markingPoints.count) }
 
     private var totalMarks: Int { FullPaper3Mock.totalMarks }
@@ -41,6 +40,23 @@ struct StructuredMockExamView: View {
         .navigationTitle("Paper 3 Mock Examination")
         .navigationBarTitleDisplayMode(.inline)
         .onDisappear { stopTimer() }
+        .task(id: timerActive) {
+            guard timerActive else { return }
+            while !Task.isCancelled && timerActive {
+                do {
+                    try await Task.sleep(for: .seconds(1))
+                } catch {
+                    return
+                }
+                guard !Task.isCancelled else { return }
+                if secondsRemaining > 0 {
+                    secondsRemaining -= 1
+                } else {
+                    submitExam()
+                    return
+                }
+            }
+        }
         .alert("Submit examination?", isPresented: $showSubmitConfirmation) {
             Button("Continue Exam", role: .cancel) { }
             Button("Submit", role: .destructive) { submitExam() }
@@ -348,24 +364,9 @@ struct StructuredMockExamView: View {
         submitted = false
         secondsRemaining = 110 * 60
         timerActive = true
-        examTimerTask?.cancel()
-        examTimerTask = Task { @MainActor in
-            while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(1))
-                guard !Task.isCancelled, timerActive else { break }
-                if secondsRemaining > 0 {
-                    secondsRemaining -= 1
-                } else {
-                    submitExam()
-                    break
-                }
-            }
-        }
     }
 
     private func stopTimer() {
-        examTimerTask?.cancel()
-        examTimerTask = nil
         timerActive = false
     }
 
