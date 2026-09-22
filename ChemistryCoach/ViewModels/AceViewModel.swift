@@ -64,7 +64,7 @@ final class AceViewModel {
     let isMockExam: Bool
     private(set) var mockExamSecondsRemaining: Int
     private(set) var mockExamFinished = false
-    private var mockExamTimerTask: Task<Void, Never>?
+    private var mockExamTimer: Timer?
 
     init(
         repository: AttemptRepository,
@@ -223,16 +223,9 @@ final class AceViewModel {
     // MARK: - Mock exam timer
 
     private func startMockExamTimer() {
-        mockExamTimerTask?.cancel()
-        mockExamTimerTask = Task { @MainActor [weak self] in
+        mockExamTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
             guard let self else { return }
-            while !Task.isCancelled && !self.mockExamFinished && self.mockExamSecondsRemaining > 0 {
-                do {
-                    try await Task.sleep(for: .seconds(1))
-                } catch {
-                    return
-                }
-                guard !Task.isCancelled else { return }
+            Task { @MainActor in
                 self.tickMockExam()
             }
         }
@@ -240,8 +233,8 @@ final class AceViewModel {
 
     private func tickMockExam() {
         guard mockExamSecondsRemaining > 0 else {
-            mockExamTimerTask?.cancel()
-            mockExamTimerTask = nil
+            mockExamTimer?.invalidate()
+            mockExamTimer = nil
             mockExamFinished = true
             SoundManager.shared.play(.complete)
             return
@@ -256,8 +249,8 @@ final class AceViewModel {
     }
 
     func endMockExamEarly() {
-        mockExamTimerTask?.cancel()
-        mockExamTimerTask = nil
+        mockExamTimer?.invalidate()
+        mockExamTimer = nil
         mockExamFinished = true
         SoundManager.shared.play(.complete)
     }
