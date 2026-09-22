@@ -23,6 +23,7 @@
 
 import SwiftUI
 
+@MainActor
 @ViewBuilder
 func integratedLabDestination(
     for type: SimulationType,
@@ -37,6 +38,7 @@ func integratedLabDestination(
     }
 }
 
+@MainActor
 @ViewBuilder
 func advancedLabDestination(
     for kind: AdvancedSimulationKind,

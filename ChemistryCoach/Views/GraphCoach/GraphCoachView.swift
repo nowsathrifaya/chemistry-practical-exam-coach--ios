@@ -297,7 +297,7 @@ struct ScatterPlotCanvasView: View {
             let rangeX = max(axisMaxX - axisMinX, 0.0001)
             let rangeY = max(axisMaxY - axisMinY, 0.0001)
 
-            func point(_ p: GraphPoint) -> CGPoint {
+            let point: (GraphPoint) -> CGPoint = { p in
                 CGPoint(
                     x: plotRect.minX + CGFloat((p.x - axisMinX) / rangeX) * plotRect.width,
                     y: plotRect.maxY - CGFloat((p.y - axisMinY) / rangeY) * plotRect.height
