@@ -11,6 +11,7 @@ import SwiftData
 struct AdaptiveCoachView: View {
     let homeViewModel: HomeViewModel
     @Environment(\.modelContext) private var modelContext
+    @EnvironmentObject private var purchases: PurchaseManager
 
     private var recommendations: [AdaptiveRecommendation] {
         AdaptiveCoach.recommendations(from: homeViewModel.attempts, limit: 3)
@@ -52,7 +53,11 @@ struct AdaptiveCoachView: View {
         let repository = AttemptRepository(modelContext: modelContext)
         switch action {
         case .qualitative:
-            QualitativeAnalysisLabView(curriculum: homeViewModel.curriculum)
+            if purchases.isPremium {
+                QualitativeAnalysisLabView(curriculum: homeViewModel.curriculum)
+            } else {
+                PremiumPaywallView(purchases: purchases)
+            }
         case .calculation:
             CalculationPracticeView()
         case .aceTopic(let topic):
@@ -60,7 +65,11 @@ struct AdaptiveCoachView: View {
         case .aceSkill(let skill):
             AcePracticeSessionView(repository: repository, curriculum: homeViewModel.curriculum, filterTopic: nil, filterSkill: skill, isMockExam: false, mockExamMinutes: 10)
         case .simulation(let type):
-            ChemistryPracticalLabView(type: type, curriculum: homeViewModel.curriculum, repository: repository)
+            if type.isFree || purchases.isPremium {
+                ChemistryPracticalLabView(type: type, curriculum: homeViewModel.curriculum, repository: repository)
+            } else {
+                PremiumPaywallView(purchases: purchases)
+            }
         case .apparatus(let type):
             ApparatusPracticeView(apparatusType: type, curriculum: homeViewModel.curriculum, repository: repository, onSaved: { homeViewModel.refreshStats() })
         case .graph(let type):

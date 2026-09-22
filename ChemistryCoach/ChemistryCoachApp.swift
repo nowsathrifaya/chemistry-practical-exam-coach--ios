@@ -17,6 +17,11 @@ import SwiftData
 struct ChemistryCoachApp: App {
     let modelContainer: ModelContainer
     @State private var preferencesStore = UserPreferencesStore()
+    // Single shared PurchaseManager for the whole app, so premium status
+    // (and its one StoreKit product fetch / entitlement check) is
+    // consistent everywhere a lab, paywall, or Settings screen needs it —
+    // rather than every screen creating and refreshing its own copy.
+    @StateObject private var purchases = PurchaseManager()
 
     init() {
         do {
@@ -30,6 +35,8 @@ struct ChemistryCoachApp: App {
         WindowGroup {
             RootView()
                 .environment(\.userPreferences, preferencesStore)
+                .environmentObject(purchases)
+                .task { await purchases.refresh() }
         }
         .modelContainer(modelContainer)
     }

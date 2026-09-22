@@ -58,11 +58,15 @@ AT THE CATHODE (reduction):
   - If the metal is near hydrogen (e.g. Zn, Fe):
     -> HYDROGEN is usually discharged (rule of thumb at O-Level)
 
-AT THE ANODE (oxidation):
+AT THE ANODE (oxidation) — the O-LEVEL EXAM RULE (a simplified selective
+discharge rule, not a universal law of electrochemistry):
   - If HALIDE ions (Cl-, Br-, I-) are present in HIGH concentration:
     -> The HALIDE is discharged (e.g. 2Cl- -> Cl2 + 2e-)
   - Otherwise (no halide, or dilute halide):
     -> OXYGEN is discharged from OH- (4OH- -> O2 + 2H2O + 4e-)
+  This "concentrated halide -> halogen, dilute halide -> oxygen" rule is the
+  version examiners expect at O-Level. It is a useful approximation, not a
+  strict universal rule — treat it as the exam-level rule to apply here.
 
 REACTIVITY SERIES (relevant part):
   K, Na, Ca, Mg, Al, [Zn, Fe], H, Cu, Ag, Au
@@ -131,7 +135,24 @@ EXAMPLE 4: Electrolysis of dilute sulfuric acid (H2SO4)
 EXAMPLE 5: Electrolysis of molten aluminium oxide (Al2O3) — industrial
 
   Cathode: Al3+ + 3e- -> Al
+
+  Theoretical (inert electrode) anode half-equation:
   Anode: 2O2- -> O2 + 4e-
+
+  ACTUAL Hall-Heroult process: the anodes are made of CARBON (graphite),
+  not an inert material. The oxygen formed at the anode reacts with the
+  hot carbon anode itself, so the anode is gradually consumed and must be
+  replaced. The gas actually given off is mainly carbon dioxide (with
+  some carbon monoxide), not oxygen gas:
+
+  O2 + C -> CO2   (main reaction; some 2O2 + C -> ... side reactions also
+                    give a smaller amount of CO)
+
+  So for an EXAM ANSWER about the half-equations, "2O2- -> O2 + 4e-" is
+  the correct half-equation to write (it shows electron transfer at the
+  anode). But if asked to describe the actual INDUSTRIAL PROCESS, you
+  should also state that the anodes are carbon and are consumed, forming
+  mainly CO2 rather than escaping as O2 gas.
 
   Used in the Hall-Heroult process. Cryolite is added to lower the melting
   point from ~2000C to ~950C.

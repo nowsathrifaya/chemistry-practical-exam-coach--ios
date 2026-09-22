@@ -17,6 +17,12 @@ SECTION 1: CATION TESTS
 Two main reagents are used: aqueous sodium hydroxide (NaOH) and aqueous
 ammonia (NH3). Add the reagent slowly, then add excess.
 
+The official 2026 SEAB 6092 Notes for Qualitative Analysis cover seven
+cations: NH4+, Ca2+, Cu2+, Fe2+, Fe3+, Zn2+ and Al3+. Pb2+ is included
+below as EXTENDED / ADDITIONAL practice (it appears in some textbooks and
+electrolysis contexts) — it is not part of the official Paper 3 table, so
+do not rely on it for the exam-set qualitative analysis question.
+
 CATION     | NaOH (add, then excess)           | NH3 (add, then excess)
 -----------+-----------------------------------+----------------------------------
 NH4+       | Gas produced on warming; gas      | (Use NaOH test instead)
@@ -43,8 +49,9 @@ Al3+       | White precipitate; dissolves in    | White precipitate; insoluble i
 (aluminium)| excess NaOH to form colourless     | excess NH3
            | solution                           |
            |                                   |
-Pb2+       | White precipitate; dissolves in    | White precipitate; dissolves in
-(lead)     | excess NaOH                        | excess NH3
+Pb2+ (EXT) | White precipitate; dissolves in    | White precipitate; INSOLUBLE
+(lead)     | excess NaOH to form colourless     | in excess NH3
+           | solution                           |
 
 KEY DISTINCTIONS:
 - Al3+ vs Zn2+: Both give white ppt with NaOH, soluble in excess.
@@ -57,6 +64,11 @@ KEY DISTINCTIONS:
 SECTION 2: ANION TESTS
 --------------------------------------------------------------------------------
 
+The official 2026 SEAB 6092 Notes for Qualitative Analysis cover five
+anions: carbonate, chloride, iodide, nitrate and sulfate. Bromide and
+phosphate below are EXTENDED / ADDITIONAL practice, not part of the
+official Paper 3 table.
+
 ANION          | REAGENT & PROCEDURE              | OBSERVATION & INFERENCE
 ---------------+----------------------------------+--------------------------
 CO3 2-         | Add dilute acid (e.g. HCl or     | Effervescence; gas turns
@@ -66,9 +78,6 @@ CO3 2-         | Add dilute acid (e.g. HCl or     | Effervescence; gas turns
 Cl-            | Acidify with dilute nitric acid,  | White precipitate (AgCl);
 (chloride)     | then add silver nitrate (AgNO3)   | insoluble in dilute HNO3.
                | solution.                         | Chloride ion confirmed.
-               |                                  |
-Br-            | Acidify with dilute nitric acid,  | Cream precipitate (AgBr);
-(bromide)      | then add silver nitrate.          | insoluble in dilute HNO3.
                |                                  |
 I-             | Acidify with dilute nitric acid,  | Yellow precipitate (AgI);
 (iodide)       | then add silver nitrate.          | insoluble in dilute HNO3.
@@ -81,7 +90,10 @@ NO3-           | Add sodium hydroxide (NaOH) and   | Ammonia gas produced; punge
 (nitrate)      | aluminium foil; warm gently. Test | smell; turns damp red litmus
                | gas with damp red litmus.         | blue. Nitrate ion confirmed.
                |                                  |
-PO4 3-         | Acidify with dilute nitric acid,  | Yellow precipitate.
+Br- (EXT)      | Acidify with dilute nitric acid,  | Cream precipitate (AgBr);
+(bromide)      | then add silver nitrate.          | insoluble in dilute HNO3.
+               |                                  |
+PO4 3- (EXT)   | Acidify with dilute nitric acid,  | Yellow precipitate.
 (phosphate)    | then add ammonium molybdate;     |
                | warm.                             |
 

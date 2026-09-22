@@ -12,10 +12,17 @@
 
 import Foundation
 
+enum AdvancedSimulationKind: Hashable {
+    case qualitativeUnknown
+    case waterOfCrystallisation
+    case saltPreparation
+}
+
 enum ContinueTarget: Hashable {
     case apparatus(ApparatusType)
     case graph(GraphCoachType)
     case simulationLab(SimulationType)
+    case advancedSimulation(AdvancedSimulationKind)
     case acePractice
     case none
 }
@@ -37,6 +44,21 @@ enum ContinueLearningResolver {
         case AttemptMode.simulationLab.rawValue:
             if let type = SimulationType.allCases.first(where: { $0.label == attempt.target }) {
                 return .simulationLab(type)
+            }
+            // The three Advanced Simulations save their target as
+            // "<Name> · <sample>" (e.g. "Water of Crystallisation · CuSO₄"),
+            // which never exactly matches a `SimulationType.label`. Without
+            // this branch those attempts silently fell through to `.none`,
+            // which still displayed the real activity name as the card's
+            // title but routed to the unrelated apparatus list when tapped.
+            if attempt.target.hasPrefix("Qualitative Analysis · ") {
+                return .advancedSimulation(.qualitativeUnknown)
+            }
+            if attempt.target.hasPrefix("Water of Crystallisation · ") {
+                return .advancedSimulation(.waterOfCrystallisation)
+            }
+            if attempt.target.hasPrefix("Salt Preparation · ") {
+                return .advancedSimulation(.saltPreparation)
             }
             return .none
         case "ACE_PRACTICE", "MOCK_EXAM":

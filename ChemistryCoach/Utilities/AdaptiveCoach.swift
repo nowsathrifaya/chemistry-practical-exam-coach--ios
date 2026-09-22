@@ -82,14 +82,33 @@ enum AdaptiveCoach {
             .map { $0 }
     }
 
+    /// Maps a saved `Attempt.target` string back to the feature it came from.
+    /// Several features legitimately share the words "qualitative" and
+    /// "calculation" in their target strings (the integrated Qualitative
+    /// Analysis lab, the standalone Unknown Sample Laboratory, and the ACE
+    /// "Qualitative Analysis" / "Chemical Calculations" topics all do), so
+    /// the more specific, more precisely-anchored checks must run BEFORE the
+    /// generic substring checks — otherwise every one of those get
+    /// mis-recommended into the standalone qualitative/calculation actions,
+    /// regardless of which feature the student actually practised in.
     static func action(for target: String) -> AdaptiveAction? {
         let lower = target.lowercased()
 
-        if lower.contains("qualitative") {
+        // Standalone features use a distinctive " · " separator followed by
+        // a specific sample/topic name — check these exact prefixes first.
+        if lower.hasPrefix("qualitative analysis · ") {
             return .qualitative
         }
-        if lower.contains("calculation") || lower.contains("titration calculation") {
+        if lower.hasPrefix("calculation practice · ") {
             return .calculation
+        }
+
+        // The integrated practical labs save their target as exactly
+        // `SimulationType.label` (no separator), so an exact match here
+        // correctly catches the integrated "Qualitative Analysis" lab
+        // before it could fall through to the generic checks below.
+        for simulation in SimulationType.allCases where lower == simulation.label.lowercased() {
+            return .simulation(simulation)
         }
 
         for topic in AceTopic.allCases where lower.contains(topic.label.lowercased()) || lower.contains(topic.rawValue.lowercased()) {

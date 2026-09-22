@@ -12,14 +12,14 @@ import SwiftUI
 struct SimulationListView: View {
     let profile: CurriculumProfile
     @Environment(\.modelContext) private var modelContext
-    @StateObject private var purchases = PurchaseManager()
+    @EnvironmentObject private var purchases: PurchaseManager
 
     var body: some View {
         List {
             Section("Integrated practical labs") {
                 ForEach(profile.simulations) { type in
                     NavigationLink {
-                        if type == .titration || purchases.isPremium {
+                        if type.isFree || purchases.isPremium {
                             ChemistryPracticalLabView(type: type, curriculum: profile.curriculum, repository: AttemptRepository(modelContext: modelContext))
                         } else {
                             PremiumPaywallView(purchases: purchases)
@@ -36,7 +36,11 @@ struct SimulationListView: View {
 
             Section("Advanced simulations") {
                 NavigationLink {
-                    QualitativeAnalysisLabView(curriculum: profile.curriculum)
+                    if purchases.isPremium {
+                        QualitativeAnalysisLabView(curriculum: profile.curriculum)
+                    } else {
+                        PremiumPaywallView(purchases: purchases)
+                    }
                 } label: {
                     VStack(alignment: .leading, spacing: 5) {
                         HStack { Image(systemName: "testtube.2").foregroundStyle(.purple); Text("Unknown Sample Laboratory").font(.headline) }
@@ -46,7 +50,11 @@ struct SimulationListView: View {
                 }
 
                 NavigationLink {
-                    WaterOfCrystallisationView(curriculum: profile.curriculum)
+                    if purchases.isPremium {
+                        WaterOfCrystallisationView(curriculum: profile.curriculum)
+                    } else {
+                        PremiumPaywallView(purchases: purchases)
+                    }
                 } label: {
                     VStack(alignment: .leading, spacing: 5) {
                         HStack { Image(systemName: "drop.degreesign.fill").foregroundStyle(.teal); Text("Water of Crystallisation").font(.headline) }
@@ -56,7 +64,11 @@ struct SimulationListView: View {
                 }
 
                 NavigationLink {
-                    SaltPreparationView(curriculum: profile.curriculum)
+                    if purchases.isPremium {
+                        SaltPreparationView(curriculum: profile.curriculum)
+                    } else {
+                        PremiumPaywallView(purchases: purchases)
+                    }
                 } label: {
                     VStack(alignment: .leading, spacing: 5) {
                         HStack { Image(systemName: "cylinder.split.50percent").foregroundStyle(.orange); Text("Salt Preparation").font(.headline) }

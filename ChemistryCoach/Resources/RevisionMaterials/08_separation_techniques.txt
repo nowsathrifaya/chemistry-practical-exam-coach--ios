@@ -61,7 +61,11 @@ SECTION 2: DETAILED DESCRIPTIONS
    - Vapour passes through a condenser (cold water jacket), condenses back
      to liquid, and is collected.
    - The solid solute remains in the flask.
-   - The thermometer measures the boiling point of the distillate.
+   - The thermometer bulb should sit level with the side-arm of the flask.
+     It measures the temperature of the VAPOUR passing that point, which is
+     used to infer the boiling point of the liquid currently distilling
+     over (it is not directly "the boiling point of the distillate" — it
+     is the vapour temperature at the thermometer bulb).
 
 5. FRACTIONAL DISTILLATION
    - Used to separate two or more miscible liquids with different boiling
@@ -70,7 +74,15 @@ SECTION 2: DETAILED DESCRIPTIONS
      multiple condensation-evaporation cycles.
    - The liquid with the lowest boiling point distils off first.
    - Example: ethanol (bp 78C) distils before water (bp 100C).
-   - Stop heating when the temperature starts rising above 78C.
+   - The thermometer reading stays close to 78C while mostly ethanol is
+     distilling over, then rises as the mixture becomes richer in water
+     (for a real ethanol-water mixture the vapour composition changes
+     gradually rather than switching at a single fixed temperature, so
+     "78C" is an approximate guide, not a rigid cut-off).
+   - Collect the fraction distilling at/near 78C separately; heating is
+     usually stopped once the temperature has clearly risen well past 78C
+     and is approaching 100C, or once the desired fraction has been
+     collected.
    - Used industrially: fractional distillation of crude oil.
 
 6. SEPARATING FUNNEL

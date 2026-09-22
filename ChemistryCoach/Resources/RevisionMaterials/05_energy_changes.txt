@@ -69,10 +69,18 @@ SECTION 4: CALORIMETRY — ENERGY TRANSFER CALCULATIONS
 FORMULA: q = m x c x Delta T
 
 Where:
-  q = energy transferred (J)
+  q = energy transferred IN THIS PARTICULAR EXPERIMENT (J or kJ) — this is
+      a total amount of energy, not "per mole".
   m = mass of the solution being heated (g) — assume 1 cm3 = 1 g
   c = specific heat capacity of water (4.2 J/g/C)
   Delta T = temperature change (T_final - T_initial) in C
+
+  Delta H (enthalpy change) = q / (moles of limiting reactant). Delta H is
+  an INTENSIVE quantity (per mole), whereas q is the total energy released
+  or absorbed in that specific run of the experiment. Do not use the two
+  terms interchangeably: q describes this one experiment; Delta H is the
+  value per mole that you would quote as "the enthalpy change of
+  neutralisation" and compare between experiments.
 
 STEPS:
 1. Measure initial temperature of the solution.
@@ -85,7 +93,7 @@ STEPS:
    = positive.
 
 WORKED EXAMPLE:
-  50 cm3 of 0.200 mol/dm3 HCl is mixed with 50 cm3 of 0.200 mol/dm3 NaOH.
+  50 cm3 of 1.00 mol/dm3 HCl is mixed with 50 cm3 of 1.00 mol/dm3 NaOH.
   The temperature rises from 22.0C to 28.5C. Calculate the enthalpy change
   of neutralisation per mole of water formed.
 
@@ -95,20 +103,28 @@ Step 1: Total mass of solution
 Step 2: Temperature change
   Delta T = 28.5 - 22.0 = +6.5C (temperature rose -> exothermic)
 
-Step 3: Energy transferred
+Step 3: Energy transferred (q, for this experiment)
   q = m x c x Delta T = 100 x 4.2 x 6.5 = 2730 J = 2.73 kJ
 
 Step 4: Moles of water formed
   HCl + NaOH -> NaCl + H2O
-  Moles of HCl = 0.200 x 0.050 = 0.0100 mol
-  Moles of NaOH = 0.200 x 0.050 = 0.0100 mol
-  Mole ratio 1:1, so moles of H2O = 0.0100 mol
+  Moles of HCl = 1.00 x 0.050 = 0.0500 mol
+  Moles of NaOH = 1.00 x 0.050 = 0.0500 mol
+  Mole ratio 1:1, so moles of H2O = 0.0500 mol
 
-Step 5: Energy per mole
-  Delta H = -2.73 / 0.0100 = -273 kJ/mol
+Step 5: Enthalpy change per mole (Delta H)
+  Delta H = -2.73 / 0.0500 = -54.6 kJ/mol
   (Negative because the reaction is exothermic.)
 
-Answer: -273 kJ/mol
+Answer: -54.6 kJ/mol
+
+NOTE: This is an experimentally-determined value calculated under the
+simplifying assumptions above (no heat loss to the surroundings or to the
+container, and that 1 cm3 of solution has the same specific heat capacity
+as pure water). It is close to the accepted literature value for strong
+acid-strong alkali neutralisation (about -57 kJ/mol) — small experimental
+values like this should always be reported alongside the assumptions used,
+not treated as an exact physical constant.
 
 --------------------------------------------------------------------------------
 SECTION 5: CALORIMETRY — EXPERIMENTAL PROCEDURE

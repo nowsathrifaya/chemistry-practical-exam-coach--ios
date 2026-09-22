@@ -145,6 +145,12 @@ enum SimulationType: String, CaseIterable, Codable, Identifiable {
     case separation = "SEPARATION"
     case solubility = "SOLUBILITY"
     var id: String { rawValue }
+
+    /// Only Acid–Base Titration is free; every other integrated practical
+    /// lab requires the "All Experiments" one-time purchase. This is the
+    /// single source of truth other screens should check before navigating
+    /// straight to a `ChemistryPracticalLabView`/`ChemistrySimulationView`.
+    var isFree: Bool { self == .titration }
     var label: String {
         switch self {
         case .titration: return "Acid–Base Titration"

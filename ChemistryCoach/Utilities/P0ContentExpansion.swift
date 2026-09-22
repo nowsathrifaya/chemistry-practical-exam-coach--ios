@@ -43,7 +43,7 @@ enum CalculationPracticeLibrary {
         .init(id:"energy1", topic:"Energy", question:"50.0 g of water rises by 6.5 °C. Calculate q using c = 4.18 J/g°C.", answer:"1.36 kJ", steps:["Use q = mcΔT.","q = 50.0 × 4.18 × 6.5 = 1358.5 J.","Convert to kJ: 1.36 kJ."]),
         .init(id:"yield1", topic:"Percentage yield", question:"The theoretical yield is 12.0 g and the actual yield is 9.0 g. Calculate percentage yield.", answer:"75.0%", steps:["Use actual/theoretical × 100%.","9.0/12.0 × 100% = 75.0%."]),
         .init(id:"purity1", topic:"Percentage purity", question:"A 5.00 g sample contains 4.25 g of pure compound. Calculate percentage purity.", answer:"85.0%", steps:["Use pure mass/sample mass × 100%.","4.25/5.00 × 100% = 85.0%."]),
-        .init(id:"water1", topic:"Water of crystallisation", question:"A hydrated salt loses 1.80 g water and leaves 2.50 g anhydrous salt. If Mr of water is 18.0 and Mr of salt is 160, find x in salt·xH₂O.", answer:"x ≈ 6", steps:["Moles water = 1.80/18.0 = 0.100 mol.","Moles salt = 2.50/160 = 0.015625 mol.","Ratio water:salt = 0.100:0.015625 ≈ 6.4:1; experimental values should be checked and rounded only after considering uncertainty."])
+        .init(id:"water1", topic:"Water of crystallisation", question:"A hydrated salt loses 1.80 g water and leaves 3.20 g anhydrous salt. If Mr of water is 18.0 and Mr of the anhydrous salt is 160, find x in salt·xH₂O.", answer:"x = 5", steps:["Moles water = 1.80/18.0 = 0.100 mol.","Moles anhydrous salt = 3.20/160 = 0.0200 mol.","Ratio water:salt = 0.100:0.0200 = 5:1, so x = 5 (e.g. CuSO₄·5H₂O)."])
     ]
 }
 

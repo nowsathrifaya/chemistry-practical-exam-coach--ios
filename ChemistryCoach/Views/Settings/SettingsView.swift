@@ -11,6 +11,7 @@ import SwiftUI
 struct SettingsView: View {
     let homeViewModel: HomeViewModel
     @Environment(\.modelContext) private var modelContext
+    @EnvironmentObject private var purchases: PurchaseManager
     @State private var showResetConfirmation = false
     @State private var soundEffectsEnabled = true
 
@@ -27,6 +28,35 @@ struct SettingsView: View {
                             .foregroundStyle(.secondary)
                     }
                 }
+            }
+
+            Section {
+                if purchases.isPremium {
+                    HStack {
+                        Image(systemName: "checkmark.seal.fill").foregroundStyle(.green)
+                        Text("All Experiments unlocked")
+                    }
+                } else {
+                    NavigationLink {
+                        PremiumPaywallView(purchases: purchases)
+                    } label: {
+                        HStack {
+                            Image(systemName: "lock.shield.fill").foregroundStyle(.tint)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Unlock all practical labs")
+                                if let product = purchases.product {
+                                    Text(product.displayPrice).font(.caption).foregroundStyle(.secondary)
+                                }
+                            }
+                        }
+                    }
+                }
+                Button("Restore Purchases") { Task { await purchases.restore() } }
+                if let error = purchases.errorMessage {
+                    Text(error).font(.caption).foregroundStyle(.red)
+                }
+            } header: {
+                Text("Premium")
             }
 
             Section("Feedback") {

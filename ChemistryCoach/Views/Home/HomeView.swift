@@ -110,9 +110,11 @@ struct HomeView: View {
 
     /// Mirrors Android's Home top-row action cards: Random Practice (rolls a
     /// fresh random apparatus/graph/ACE destination each tap) and Mock Exam
-    /// (jumps straight into a timed ACE session sized to this curriculum's
-    /// paper duration). "Last Experiment" is covered by `ContinueLearningCard`
-    /// above rather than duplicated here.
+    /// (opens the same full structured Paper 3 mock — `StructuredMockExamView`
+    /// — as the "Full Paper 3 mock" entry in the Practice tab, so the two
+    /// entry points give an identical exam, not a lighter ACE-only quiz).
+    /// "Last Experiment" is covered by `ContinueLearningCard` above rather
+    /// than duplicated here.
     private var quickActionsRow: some View {
         HStack(spacing: 12) {
             Button {
@@ -123,11 +125,7 @@ struct HomeView: View {
             .buttonStyle(.plain)
 
             NavigationLink {
-                AcePracticeSessionView(
-                    repository: AttemptRepository(modelContext: modelContext),
-                    curriculum: homeViewModel.curriculum, filterTopic: nil, filterSkill: nil,
-                    isMockExam: true, mockExamMinutes: profile.durationMinutes
-                )
+                StructuredMockExamView()
             } label: {
                 QuickActionCard(title: "Mock\nExam", subtitle: "\(profile.durationMinutes) min timed", systemImage: "timer", tint: Color(hex: "#9B51E0"))
             }
@@ -167,6 +165,7 @@ private struct ContinueLearningCard: View {
     let homeViewModel: HomeViewModel
     let profile: CurriculumProfile
     @Environment(\.modelContext) private var modelContext
+    @EnvironmentObject private var purchases: PurchaseManager
 
     var body: some View {
         let target = ContinueLearningResolver.resolve(homeViewModel.userStats.lastAttempt)
@@ -206,6 +205,12 @@ private struct ContinueLearningCard: View {
                 } label: {
                     ContinueCardBody(title: "Continue: \(label)", systemImage: "arrow.forward.circle.fill")
                 }
+            case .advancedSimulation(let kind):
+                NavigationLink {
+                    advancedSimulationDestination(for: kind)
+                } label: {
+                    ContinueCardBody(title: "Continue: \(label)", systemImage: "arrow.forward.circle.fill")
+                }
             case .none:
                 NavigationLink {
                     ApparatusListView(profile: profile)
@@ -219,8 +224,28 @@ private struct ContinueLearningCard: View {
 
     @ViewBuilder
     private func labDestination(for type: SimulationType) -> some View {
-        let repository = AttemptRepository(modelContext: modelContext)
-        ChemistrySimulationView(type: type, repository: repository, curriculum: homeViewModel.curriculum)
+        if type.isFree || purchases.isPremium {
+            let repository = AttemptRepository(modelContext: modelContext)
+            ChemistrySimulationView(type: type, repository: repository, curriculum: homeViewModel.curriculum)
+        } else {
+            PremiumPaywallView(purchases: purchases)
+        }
+    }
+
+    @ViewBuilder
+    private func advancedSimulationDestination(for kind: AdvancedSimulationKind) -> some View {
+        if purchases.isPremium {
+            switch kind {
+            case .qualitativeUnknown:
+                QualitativeAnalysisLabView(curriculum: homeViewModel.curriculum)
+            case .waterOfCrystallisation:
+                WaterOfCrystallisationView(curriculum: homeViewModel.curriculum)
+            case .saltPreparation:
+                SaltPreparationView(curriculum: homeViewModel.curriculum)
+            }
+        } else {
+            PremiumPaywallView(purchases: purchases)
+        }
     }
 }
 
