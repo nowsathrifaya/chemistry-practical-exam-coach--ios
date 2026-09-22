@@ -18,6 +18,12 @@ workflows:
         XCODE_PROJECT: "ChemistryCoach.xcodeproj"
         XCODE_SCHEME: "ChemistryCoach"
         APP_VERSION: "1.1.0"
+        # Your app's numeric Apple ID (NOT the bundle identifier) — find it in
+        # App Store Connect > My Apps > Chemistry Practical Exam Coach >
+        # General > App Information > Apple ID. Required for the build-number
+        # auto-increment step below; leave blank and that step just falls
+        # back to $BUILD_NUMBER instead of failing.
+        APP_STORE_APP_ID: ""
 
     scripts:
 
@@ -67,10 +73,37 @@ workflows:
 
           xcrun agvtool new-marketing-version "$APP_VERSION"
 
-          BUILD_NUMBER_VALUE="${BUILD_NUMBER:-2}"
+          # Codemagic's own $BUILD_NUMBER counter can be lower than the highest
+          # build already sitting in App Store Connect (e.g. after a workflow
+          # rename, a manual upload, or the counter being reset) — and ASC
+          # rejects any upload whose CFBundleVersion isn't strictly higher than
+          # the last one it has on file. So rather than trust $BUILD_NUMBER
+          # blindly, ask App Store Connect for the latest build number it has
+          # for this app and build one past that; this self-heals even if the
+          # local counter resets again later. `get-latest-build-number` needs
+          # the app's numeric Apple ID (APP_STORE_APP_ID), not the bundle
+          # identifier — falls back to $BUILD_NUMBER (then 2) if that isn't
+          # set, or if the lookup fails, e.g. before any build exists yet.
+          LATEST_ASC_BUILD_NUMBER=""
+          if [ -n "$APP_STORE_APP_ID" ]; then
+            LATEST_ASC_BUILD_NUMBER="$(app-store-connect get-latest-build-number "$APP_STORE_APP_ID" 2>/dev/null || echo "")"
+          fi
 
-          if [ "$BUILD_NUMBER_VALUE" -lt 2 ]; then
-            BUILD_NUMBER_VALUE=2
+          if [ -n "$LATEST_ASC_BUILD_NUMBER" ] && [ "$LATEST_ASC_BUILD_NUMBER" -ge 0 ] 2>/dev/null; then
+            BUILD_NUMBER_VALUE=$((LATEST_ASC_BUILD_NUMBER + 1))
+            echo "Latest build number on App Store Connect: $LATEST_ASC_BUILD_NUMBER"
+          else
+            echo "Could not fetch latest build number from App Store Connect (APP_STORE_APP_ID unset or lookup failed) — falling back to \$BUILD_NUMBER."
+            BUILD_NUMBER_VALUE="${BUILD_NUMBER:-2}"
+          fi
+
+          # Safety-net floor: App Store Connect already has build 21 on file
+          # (as of this fix), so even without APP_STORE_APP_ID set yet, the
+          # fallback won't collide with it. Once APP_STORE_APP_ID is filled
+          # in above, this floor stops mattering since the ASC lookup will
+          # already be ahead of it.
+          if [ "$BUILD_NUMBER_VALUE" -lt 22 ]; then
+            BUILD_NUMBER_VALUE=22
           fi
 
           echo "Marketing Version: $APP_VERSION"
