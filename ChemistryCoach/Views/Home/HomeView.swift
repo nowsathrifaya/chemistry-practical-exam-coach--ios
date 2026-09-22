@@ -28,45 +28,56 @@ struct HomeView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                header
+            VStack(alignment: .leading, spacing: 28) {
+                VStack(alignment: .leading, spacing: 16) {
+                    header
+                    ExamCountdownCard()
+                    ContinueLearningCard(homeViewModel: homeViewModel, profile: profile)
+                }
 
-                ExamCountdownCard()
+                VStack(alignment: .leading, spacing: 12) {
+                    SectionHeader(title: "Your progress")
+                    statsRow
+                    PracticalReadinessCard(attempts: homeViewModel.attempts, curriculum: homeViewModel.curriculum)
+                    AdaptiveCoachView(homeViewModel: homeViewModel)
+                }
 
-                ContinueLearningCard(homeViewModel: homeViewModel, profile: profile)
+                VStack(alignment: .leading, spacing: 12) {
+                    SectionHeader(title: "Practice")
+                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 14) {
+                        Button {
+                            randomDestination = rollRandomPracticeDestination()
+                        } label: {
+                            QuickActionCard(title: "Random Practice", subtitle: "Surprise me", systemImage: "die.face.5.fill", tint: Color(hex: "#0F5A4F"))
+                        }
+                        .buttonStyle(.plain)
 
-                statsRow
+                        NavigationLink {
+                            premiumDestination(purchases: purchases) { StructuredMockExamView() }
+                        } label: {
+                            QuickActionCard(title: "Mock Exam", subtitle: "\(profile.durationMinutes) min timed", systemImage: "timer", tint: Color(hex: "#9B51E0"))
+                        }
 
-                PracticalReadinessCard(attempts: homeViewModel.attempts, curriculum: homeViewModel.curriculum)
-
-                AdaptiveCoachView(homeViewModel: homeViewModel)
-
-                quickActionsRow
-
-                Text("Practice")
-                    .font(.title3.bold())
-                    .padding(.top, 4)
-
-                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 14) {
-                    NavigationLink {
-                        ApparatusListView(profile: profile)
-                    } label: {
-                        QuickActionCard(title: "Apparatus", subtitle: "\(profile.apparatus.count) instruments", systemImage: "ruler.fill", tint: .blue)
-                    }
-                    NavigationLink {
-                        premiumDestination(purchases: purchases) { GraphCoachListView(profile: profile) }
-                    } label: {
-                        QuickActionCard(title: "Graph Coach", subtitle: "\(profile.graphTypes.count) graph types", systemImage: "chart.xyaxis.line", tint: .purple)
-                    }
-                    NavigationLink {
-                        SimulationListView(profile: profile)
-                    } label: {
-                        QuickActionCard(title: "Simulations", subtitle: "\(profile.simulations.count) experiments", systemImage: "flask.fill", tint: .teal)
-                    }
-                    NavigationLink {
-                        AceListView(curriculum: homeViewModel.curriculum)
-                    } label: {
-                        QuickActionCard(title: "ACE Practice", subtitle: "Exam technique", systemImage: "checkmark.seal.fill", tint: .orange)
+                        NavigationLink {
+                            ApparatusListView(profile: profile)
+                        } label: {
+                            QuickActionCard(title: "Apparatus", subtitle: "\(profile.apparatus.count) instruments", systemImage: "ruler.fill", tint: .blue)
+                        }
+                        NavigationLink {
+                            premiumDestination(purchases: purchases) { GraphCoachListView(profile: profile) }
+                        } label: {
+                            QuickActionCard(title: "Graph Coach", subtitle: "\(profile.graphTypes.count) graph types", systemImage: "chart.xyaxis.line", tint: .purple)
+                        }
+                        NavigationLink {
+                            SimulationListView(profile: profile)
+                        } label: {
+                            QuickActionCard(title: "Simulations", subtitle: "\(profile.simulations.count) experiments", systemImage: "flask.fill", tint: .teal)
+                        }
+                        NavigationLink {
+                            AceListView(curriculum: homeViewModel.curriculum)
+                        } label: {
+                            QuickActionCard(title: "ACE Practice", subtitle: "Exam technique", systemImage: "checkmark.seal.fill", tint: .orange)
+                        }
                     }
                 }
 
@@ -108,30 +119,6 @@ struct HomeView: View {
             StatPill(value: "\(stats.streakDays)", label: "Day streak", systemImage: "flame.fill")
             StatPill(value: "\(stats.totalPoints)", label: "Points", systemImage: "star.fill")
             StatPill(value: "\(stats.accuracyPercent)%", label: "Accuracy", systemImage: "target")
-        }
-    }
-
-    /// Mirrors Android's Home top-row action cards: Random Practice (rolls a
-    /// fresh random apparatus/graph/ACE destination each tap) and Mock Exam
-    /// (opens the same full structured Paper 3 mock — `StructuredMockExamView`
-    /// — as the "Full Paper 3 mock" entry in the Practice tab, so the two
-    /// entry points give an identical exam, not a lighter ACE-only quiz).
-    /// "Last Experiment" is covered by `ContinueLearningCard` above rather
-    /// than duplicated here.
-    private var quickActionsRow: some View {
-        HStack(spacing: 12) {
-            Button {
-                randomDestination = rollRandomPracticeDestination()
-            } label: {
-                QuickActionCard(title: "Random\nPractice", subtitle: "", systemImage: "die.face.5.fill", tint: Color(hex: "#0F5A4F"))
-            }
-            .buttonStyle(.plain)
-
-            NavigationLink {
-                premiumDestination(purchases: purchases) { StructuredMockExamView() }
-            } label: {
-                QuickActionCard(title: "Mock\nExam", subtitle: "\(profile.durationMinutes) min timed", systemImage: "timer", tint: Color(hex: "#9B51E0"))
-            }
         }
     }
 
@@ -365,6 +352,15 @@ private struct ExamCountdownCard: View {
         if days == 0 { return "Exam is today — good luck!" }
         if days == 1 { return "1 day to go" }
         return "\(days) days to go"
+    }
+}
+
+struct SectionHeader: View {
+    let title: String
+
+    var body: some View {
+        Text(title)
+            .font(.title3.bold())
     }
 }
 
