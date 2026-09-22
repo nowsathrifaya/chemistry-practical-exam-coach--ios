@@ -103,6 +103,19 @@ enum ApparatusType: String, CaseIterable, Codable, Identifiable {
     static let mvpTypes = Array(ApparatusType.allCases)
 }
 
+/// What a Graph Coach dataset is actually marked on. Titration is its own
+/// kind rather than a `.gradient` task because a titration curve's slope
+/// isn't a meaningful physical constant the way it is for the other graph
+/// types — the real skill being tested is locating the equivalence point
+/// (the volume at the steepest part of the pH jump), so it gets its own
+/// single-tap "mark the end-point" interaction instead of a two-point
+/// gradient triangle. See `GraphCoachPracticeView` for how the two modes
+/// diverge in the UI.
+enum GraphTaskKind {
+    case gradient
+    case equivalencePoint
+}
+
 enum GraphCoachType: String, CaseIterable, Codable, Identifiable {
     case titrationCurve = "TITRATION_CURVE"
     case rateGasVolume = "RATE_GAS_VOLUME"
@@ -117,19 +130,23 @@ enum GraphCoachType: String, CaseIterable, Codable, Identifiable {
         let yLabel: String
         let yUnit: String
         let gradientMeaning: String
+        let taskKind: GraphTaskKind
+        /// Shown in a collapsible "Technique tip" card before the student
+        /// attempts the graph — exam-technique guidance, not the answer.
+        let techniqueTip: String
     }
     var definition: Definition {
         switch self {
         case .titrationCurve:
-            return Definition(label:"Titration data", xLabel:"Volume added", xUnit:"cm³", yLabel:"pH / indicator observation", yUnit:"", gradientMeaning:"Identify the end-point from the sharp change in pH or indicator colour.")
+            return Definition(label:"Titration data", xLabel:"Volume added", xUnit:"cm³", yLabel:"pH / indicator observation", yUnit:"", gradientMeaning:"Identify the end-point from the sharp change in pH or indicator colour.", taskKind: .equivalencePoint, techniqueTip: "The equivalence point is where the curve is steepest, not necessarily where it's highest. Look for the middle of the near-vertical section of the jump, not just the top of the curve.")
         case .rateGasVolume:
-            return Definition(label:"Volume of gas vs time", xLabel:"Time", xUnit:"s", yLabel:"Volume of gas", yUnit:"cm³", gradientMeaning:"Gradient represents the rate of reaction at that point.")
+            return Definition(label:"Volume of gas vs time", xLabel:"Time", xUnit:"s", yLabel:"Volume of gas", yUnit:"cm³", gradientMeaning:"Gradient represents the rate of reaction at that point.", taskKind: .gradient, techniqueTip: "The initial rate is the tangent right at t = 0, where the curve is steepest — use the first part of the curve, not the flatter section where the reaction is finishing.")
         case .rateConcentration:
-            return Definition(label:"Concentration vs time", xLabel:"Time", xUnit:"s", yLabel:"Concentration", yUnit:"mol/dm³", gradientMeaning:"The magnitude of the gradient gives the rate of disappearance or formation, depending on the plotted species.")
+            return Definition(label:"Concentration vs time", xLabel:"Time", xUnit:"s", yLabel:"Concentration", yUnit:"mol/dm³", gradientMeaning:"The magnitude of the gradient gives the rate of disappearance or formation, depending on the plotted species.", taskKind: .gradient, techniqueTip: "This curve falls, so your gradient should come out negative. Pick two points well apart on the steep early section for the initial rate.")
         case .temperatureChange:
-            return Definition(label:"Temperature change", xLabel:"Time", xUnit:"s", yLabel:"Temperature", yUnit:"°C", gradientMeaning:"Use the temperature-time data to identify the maximum/minimum temperature change.")
+            return Definition(label:"Temperature change", xLabel:"Time", xUnit:"s", yLabel:"Temperature", yUnit:"°C", gradientMeaning:"Use the temperature-time data to identify the maximum/minimum temperature change.", taskKind: .gradient, techniqueTip: "Draw your gradient triangle across the steepest part of the curve, as close to the start as you can, since that's where the initial rate of temperature change is read.")
         case .chromatography:
-            return Definition(label:"Chromatography data", xLabel:"Distance travelled by solvent", xUnit:"cm", yLabel:"Distance travelled by spot", yUnit:"cm", gradientMeaning:"Use the distances to calculate Rf = distance travelled by substance / distance travelled by solvent.")
+            return Definition(label:"Chromatography data", xLabel:"Distance travelled by solvent", xUnit:"cm", yLabel:"Distance travelled by spot", yUnit:"cm", gradientMeaning:"Use the distances to calculate Rf = distance travelled by substance / distance travelled by solvent.", taskKind: .gradient, techniqueTip: "Rf is a ratio, so it has no units — pick two points spread far apart along the line for an accurate gradient, since Rf equals that gradient here.")
         }
     }
     var label: String { definition.label }
@@ -229,7 +246,15 @@ struct GraphDataset {
     let type: GraphCoachType
     let seed: Int
     let points: [GraphPoint]
+    /// For `.gradient` types: the true underlying gradient. For
+    /// `.equivalencePoint` (titration): the true equivalence volume.
     let expectedGradient: Double
+    /// Two clean (noise-free) points along the true underlying trend,
+    /// spanning the plotted x-range — used only to draw the reference line
+    /// shown after marking, so a student can compare their picked triangle
+    /// against the real trend. Not shown to the student before they submit.
+    let referenceStart: GraphPoint
+    let referenceEnd: GraphPoint
 }
 struct GraphGradientResult {
     let correct: Bool

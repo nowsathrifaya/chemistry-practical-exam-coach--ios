@@ -58,3 +58,26 @@ func advancedLabDestination(
         PremiumPaywallView(purchases: purchases)
     }
 }
+
+/// Generic gate for the handful of premium features that aren't a
+/// `SimulationType`/`AdvancedSimulationKind` case at all — the mock
+/// exams, the practical reference tables, and Graph Coach — so those
+/// call sites don't each write their own `if purchases.isPremium { … }
+/// else { PremiumPaywallView(...) }` and risk forgetting the check.
+/// Wrap the real destination in a trailing closure:
+///
+///     NavigationLink {
+///         premiumDestination(purchases: purchases) { StructuredMockExamView() }
+///     } label: { ... }
+@MainActor
+@ViewBuilder
+func premiumDestination<Content: View>(
+    purchases: PurchaseManager,
+    @ViewBuilder content: () -> Content
+) -> some View {
+    if purchases.isPremium {
+        content()
+    } else {
+        PremiumPaywallView(purchases: purchases)
+    }
+}

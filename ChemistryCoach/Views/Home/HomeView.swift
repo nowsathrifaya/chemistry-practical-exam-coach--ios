@@ -21,6 +21,7 @@ enum RandomPracticeDestination: Hashable {
 struct HomeView: View {
     @Bindable var homeViewModel: HomeViewModel
     @Environment(\.modelContext) private var modelContext
+    @EnvironmentObject private var purchases: PurchaseManager
     @State private var randomDestination: RandomPracticeDestination?
 
     private var profile: CurriculumProfile { CurriculumProfiles.forCurriculum(homeViewModel.curriculum) }
@@ -53,7 +54,7 @@ struct HomeView: View {
                         QuickActionCard(title: "Apparatus", subtitle: "\(profile.apparatus.count) instruments", systemImage: "ruler.fill", tint: .blue)
                     }
                     NavigationLink {
-                        GraphCoachListView(profile: profile)
+                        premiumDestination(purchases: purchases) { GraphCoachListView(profile: profile) }
                     } label: {
                         QuickActionCard(title: "Graph Coach", subtitle: "\(profile.graphTypes.count) graph types", systemImage: "chart.xyaxis.line", tint: .purple)
                     }
@@ -82,7 +83,9 @@ struct HomeView: View {
             case .apparatus(let type):
                 ApparatusPracticeContainerView(apparatusType: type, curriculum: homeViewModel.curriculum)
             case .graph(let type):
-                GraphCoachPracticeContainerView(graphType: type, curriculum: homeViewModel.curriculum)
+                premiumDestination(purchases: purchases) {
+                    GraphCoachPracticeContainerView(graphType: type, curriculum: homeViewModel.curriculum)
+                }
             case .aceList:
                 AceListView(curriculum: homeViewModel.curriculum)
             }
@@ -125,7 +128,7 @@ struct HomeView: View {
             .buttonStyle(.plain)
 
             NavigationLink {
-                StructuredMockExamView()
+                premiumDestination(purchases: purchases) { StructuredMockExamView() }
             } label: {
                 QuickActionCard(title: "Mock\nExam", subtitle: "\(profile.durationMinutes) min timed", systemImage: "timer", tint: Color(hex: "#9B51E0"))
             }
@@ -185,11 +188,13 @@ private struct ContinueLearningCard: View {
                 }
             case .graph(let type):
                 NavigationLink {
-                    GraphCoachPracticeView(
-                        graphType: type, curriculum: homeViewModel.curriculum,
-                        repository: AttemptRepository(modelContext: modelContext),
-                        onSaved: { homeViewModel.refreshStats() }
-                    )
+                    premiumDestination(purchases: purchases) {
+                        GraphCoachPracticeView(
+                            graphType: type, curriculum: homeViewModel.curriculum,
+                            repository: AttemptRepository(modelContext: modelContext),
+                            onSaved: { homeViewModel.refreshStats() }
+                        )
+                    }
                 } label: {
                     ContinueCardBody(title: "Continue: \(label)", systemImage: "arrow.forward.circle.fill")
                 }

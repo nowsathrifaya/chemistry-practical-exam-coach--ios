@@ -10,6 +10,7 @@ import SwiftUI
 struct PracticeHubView: View {
     let homeViewModel: HomeViewModel
     @Environment(\.modelContext) private var modelContext
+    @EnvironmentObject private var purchases: PurchaseManager
     private var profile: CurriculumProfile { CurriculumProfiles.forCurriculum(homeViewModel.curriculum) }
 
     var body: some View {
@@ -21,7 +22,7 @@ struct PracticeHubView: View {
                     Label("Apparatus reading", systemImage: "ruler.fill")
                 }
                 NavigationLink {
-                    GraphCoachListView(profile: profile)
+                    premiumDestination(purchases: purchases) { GraphCoachListView(profile: profile) }
                 } label: {
                     Label("Graph Coach", systemImage: "chart.xyaxis.line")
                 }
@@ -47,12 +48,12 @@ struct PracticeHubView: View {
 
             Section("Exam practice") {
                 NavigationLink {
-                    StructuredMockExamView()
+                    premiumDestination(purchases: purchases) { StructuredMockExamView() }
                 } label: {
                     Label("Full Paper 3 mock · 40 marks · 1h 50m", systemImage: "doc.text.fill")
                 }
                 NavigationLink {
-                    MockPracticalView(curriculum: homeViewModel.curriculum)
+                    premiumDestination(purchases: purchases) { MockPracticalView(curriculum: homeViewModel.curriculum) }
                 } label: {
                     Label("Practical mock questions", systemImage: "pencil.line")
                 }
@@ -69,7 +70,7 @@ struct PracticeHubView: View {
 
             Section("Reference") {
                 NavigationLink {
-                    CompleteReferenceView()
+                    premiumDestination(purchases: purchases) { CompleteReferenceView() }
                 } label: {
                     Label("Practical reference tables", systemImage: "text.book.closed.fill")
                 }

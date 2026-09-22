@@ -49,6 +49,7 @@ final class GraphCoachPracticeViewModel {
     private let repository: AttemptRepository
     let graphType: GraphCoachType
     let curriculum: Curriculum
+    var taskKind: GraphTaskKind { graphType.definition.taskKind }
 
     private(set) var dataset: GraphDataset
     var studentGradientInput: String = ""
@@ -60,7 +61,13 @@ final class GraphCoachPracticeViewModel {
     var axisChoiceCorrect: Bool { axisChosen == nil || axisChosen == graphType.definition.xLabel }
     var axisChoiceMade: Bool { axisChosen != nil }
 
-    // Tap-to-pick gradient triangle (Section 13: "plot points" / "gradient triangle")
+    /// Collapsible exam-technique tip, shown once the graph is revealed and
+    /// collapsed by default so it doesn't read as the answer being handed over.
+    var showTechniqueTip: Bool = false
+
+    // Tap-to-pick gradient triangle (Section 13: "plot points" / "gradient triangle").
+    // For the titration `.equivalencePoint` task this holds at most one point —
+    // a single tap on the volume where the curve is steepest — rather than two.
     private(set) var pickedPoints: [GraphPoint] = []
     private(set) var pointsTooClose: Bool = false
     private(set) var pointsExtrapolated: Bool = false
@@ -78,16 +85,28 @@ final class GraphCoachPracticeViewModel {
         axisChosen = label
     }
 
-    /// Records a tapped point (already converted to data coordinates) as part of the
-    /// student's chosen gradient triangle. The second tap evaluates the triangle and
-    /// auto-fills the gradient field — the student can still edit it by hand.
+    /// Records a tapped point (already converted to data coordinates).
+    /// In `.gradient` mode, two taps form the gradient triangle and
+    /// auto-fill the gradient field (still hand-editable afterwards). In
+    /// `.equivalencePoint` mode (titration), a single tap marks the
+    /// candidate end-point volume and can be re-tapped to move it right up
+    /// until the student submits.
     func pickPoint(_ p: GraphPoint) {
-        guard pickedPoints.count < 2, result == nil else { return }
-        pickedPoints.append(p)
-        guard pickedPoints.count == 2 else { return }
+        guard result == nil else { return }
         let xs = dataset.points.map(\.x)
         guard let minX = xs.min(), let maxX = xs.max(), maxX > minX else { return }
         let range = maxX - minX
+
+        if taskKind == .equivalencePoint {
+            pickedPoints = [p]
+            pointsExtrapolated = p.x < minX - range * 0.02 || p.x > maxX + range * 0.02
+            studentGradientInput = String(format: "%.1f", p.x)
+            return
+        }
+
+        guard pickedPoints.count < 2 else { return }
+        pickedPoints.append(p)
+        guard pickedPoints.count == 2 else { return }
         // Signed on purpose: (y2 - y1) / (x2 - x1) is invariant to which point was
         // tapped first, since swapping the two points negates both the numerator and
         // the denominator. Using abs() only on the denominator (as before) broke that
@@ -106,11 +125,17 @@ final class GraphCoachPracticeViewModel {
         pickedPoints = []
         pointsTooClose = false
         pointsExtrapolated = false
+        studentGradientInput = ""
     }
 
     func submit(onSaved: () -> Void) {
-        let gradient = Double(studentGradientInput.trimmingCharacters(in: .whitespaces).replacingOccurrences(of: ",", with: "."))
-        let outcome = marker.mark(dataset: dataset, studentGradient: gradient, pointsTooClose: pointsTooClose, pointsExtrapolated: pointsExtrapolated, axisChoiceCorrect: axisChoiceCorrect, curriculum: curriculum)
+        let value = Double(studentGradientInput.trimmingCharacters(in: .whitespaces).replacingOccurrences(of: ",", with: "."))
+        let outcome: GraphGradientResult
+        if taskKind == .equivalencePoint {
+            outcome = marker.markEquivalencePoint(dataset: dataset, studentVolume: value, pointExtrapolated: pointsExtrapolated, axisChoiceCorrect: axisChoiceCorrect, curriculum: curriculum)
+        } else {
+            outcome = marker.mark(dataset: dataset, studentGradient: value, pointsTooClose: pointsTooClose, pointsExtrapolated: pointsExtrapolated, axisChoiceCorrect: axisChoiceCorrect, curriculum: curriculum)
+        }
         result = outcome
         SoundManager.shared.play(outcome.correct ? .success : .error)
         repository.save(
@@ -125,6 +150,7 @@ final class GraphCoachPracticeViewModel {
         dataset = generator.generate(type: graphType, seed: Int.random(in: 0...Int(Int32.max)), curriculum: curriculum)
         axisOptions = [graphType.definition.xLabel, graphType.definition.yLabel].shuffled()
         axisChosen = nil
+        showTechniqueTip = false
         studentGradientInput = ""
         pickedPoints = []
         pointsTooClose = false
@@ -145,6 +171,18 @@ struct GraphCoachPracticeView: View {
 
     private var def: GraphCoachType.Definition { viewModel.graphType.definition }
 
+    private var instructionText: String {
+        viewModel.taskKind == .equivalencePoint
+            ? "Tap the curve where it's rising most steeply — the middle of the jump — to mark the equivalence point, or type a volume directly."
+            : "Tap two well-separated points on your best-fit line to form a gradient triangle, or type a value directly."
+    }
+    private var fieldLabel: String {
+        viewModel.taskKind == .equivalencePoint ? "Equivalence volume" : "Your gradient"
+    }
+    private var confirmButtonLabel: String {
+        viewModel.taskKind == .equivalencePoint ? "Check end-point" : "Check gradient"
+    }
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
@@ -163,38 +201,53 @@ struct GraphCoachPracticeView: View {
                         Label("Convention places \(def.xLabel) on the x-axis — keep this in mind below.", systemImage: "exclamationmark.triangle.fill")
                             .font(.caption).foregroundStyle(.orange)
                     }
-                    ScatterPlotCanvasView(dataset: viewModel.dataset, definition: def, pickedPoints: viewModel.pickedPoints) { dataPoint in
+
+                    TechniqueTipCard(tip: def.techniqueTip, isExpanded: $viewModel.showTechniqueTip)
+
+                    ScatterPlotCanvasView(
+                        dataset: viewModel.dataset, definition: def, pickedPoints: viewModel.pickedPoints,
+                        referenceLine: viewModel.result != nil ? (viewModel.dataset.referenceStart, viewModel.dataset.referenceEnd) : nil
+                    ) { dataPoint in
                         viewModel.pickPoint(dataPoint)
                     }
                     .frame(height: 260)
                     .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
 
-                    Text("Tap two well-separated points on your best-fit line to form a gradient triangle, or type a value directly.")
+                    if viewModel.result != nil {
+                        Label("Green line shows the true trend for comparison.", systemImage: "line.diagonal")
+                            .font(.caption2).foregroundStyle(.green)
+                    }
+
+                    Text(instructionText)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
 
                     if !viewModel.pickedPoints.isEmpty {
                         HStack {
-                            Text("Picked \(viewModel.pickedPoints.count)/2 point(s)").font(.caption)
+                            Text(viewModel.taskKind == .equivalencePoint ? "Marked at \(String(format: "%.1f", viewModel.pickedPoints[0].x)) \(def.xUnit)" : "Picked \(viewModel.pickedPoints.count)/2 point(s)")
+                                .font(.caption)
                             Spacer()
-                            Button("Clear points") { viewModel.clearPickedPoints() }.font(.caption)
+                            Button(viewModel.taskKind == .equivalencePoint ? "Clear mark" : "Clear points") { viewModel.clearPickedPoints() }.font(.caption)
                         }
                     }
 
                     HStack {
-                        TextField("Your gradient", text: $viewModel.studentGradientInput)
+                        TextField(fieldLabel, text: $viewModel.studentGradientInput)
                             .keyboardType(.decimalPad)
                             .textFieldStyle(.roundedBorder)
                             .focused($inputFocused)
-                        Text("\(def.yUnit)/\(def.xUnit)")
-                            .foregroundStyle(.secondary)
+                        if viewModel.taskKind == .equivalencePoint {
+                            Text(def.xUnit).foregroundStyle(.secondary)
+                        } else {
+                            Text("\(def.yUnit)/\(def.xUnit)").foregroundStyle(.secondary)
+                        }
                     }
 
                     if let result = viewModel.result {
                         GraphResultCard(result: result)
                     }
 
-                    Button(viewModel.result == nil ? "Check gradient" : "New dataset") {
+                    Button(viewModel.result == nil ? confirmButtonLabel : "New dataset") {
                         if viewModel.result == nil {
                             inputFocused = false
                             viewModel.submit(onSaved: { onSaved?() })
@@ -211,6 +264,28 @@ struct GraphCoachPracticeView: View {
         .background(Color(.systemGroupedBackground))
         .navigationTitle(viewModel.graphType.label)
         .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+/// Collapsed by default so it reads as an optional nudge on exam technique
+/// rather than the answer being handed over before the student has tried.
+private struct TechniqueTipCard: View {
+    let tip: String
+    @Binding var isExpanded: Bool
+
+    var body: some View {
+        DisclosureGroup(isExpanded: $isExpanded) {
+            Text(tip)
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+                .padding(.top, 4)
+        } label: {
+            Label("Technique tip", systemImage: "lightbulb.fill")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.yellow)
+        }
+        .padding(12)
+        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 }
 
@@ -257,6 +332,10 @@ struct ScatterPlotCanvasView: View {
     let dataset: GraphDataset
     let definition: GraphCoachType.Definition
     var pickedPoints: [GraphPoint] = []
+    /// Two clean points describing the true trend, drawn as a dashed green
+    /// reference once the student has submitted an answer. Pass nil to hide
+    /// it (i.e. before marking, so it can't be used to read off the answer).
+    var referenceLine: (GraphPoint, GraphPoint)? = nil
     var onTap: ((GraphPoint) -> Void)? = nil
 
     /// Number of gridlines/tick labels drawn along each axis.
@@ -341,7 +420,13 @@ struct ScatterPlotCanvasView: View {
                     context.stroke(cross, with: .color(.blue), lineWidth: 2)
                 }
 
-                if pickedPoints.count == 2 {
+                if definition.taskKind == .equivalencePoint, let mark = pickedPoints.first {
+                    let x = point(GraphPoint(x: mark.x, y: 0)).x
+                    var marker = Path()
+                    marker.move(to: CGPoint(x: x, y: plotRect.minY))
+                    marker.addLine(to: CGPoint(x: x, y: plotRect.maxY))
+                    context.stroke(marker, with: .color(.orange), style: StrokeStyle(lineWidth: 2, dash: [4, 3]))
+                } else if pickedPoints.count == 2 {
                     var triangle = Path()
                     triangle.move(to: point(pickedPoints[0]))
                     triangle.addLine(to: point(pickedPoints[1]))
@@ -350,6 +435,14 @@ struct ScatterPlotCanvasView: View {
                 for p in pickedPoints {
                     let center = point(p)
                     context.fill(Path(ellipseIn: CGRect(x: center.x - 5, y: center.y - 5, width: 10, height: 10)), with: .color(.orange))
+                }
+
+                // True-trend reference, only revealed after the student has submitted.
+                if let (refA, refB) = referenceLine {
+                    var refPath = Path()
+                    refPath.move(to: point(refA))
+                    refPath.addLine(to: point(refB))
+                    context.stroke(refPath, with: .color(.green), style: StrokeStyle(lineWidth: 2, dash: [6, 4]))
                 }
 
                 context.draw(Text(definition.xLabel).font(.caption2), at: CGPoint(x: plotRect.midX, y: size.height - 8))
@@ -371,7 +464,11 @@ struct ScatterPlotCanvasView: View {
                 }
             )
         }
-        .accessibilityLabel("Scatter plot of \(definition.label). Tap two points to form a gradient triangle.")
+        .accessibilityLabel(
+            definition.taskKind == .equivalencePoint
+                ? "Scatter plot of \(definition.label). Tap the steepest part of the curve to mark the equivalence point."
+                : "Scatter plot of \(definition.label). Tap two points to form a gradient triangle."
+        )
         .padding(12)
     }
 }

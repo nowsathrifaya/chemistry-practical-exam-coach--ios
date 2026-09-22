@@ -53,6 +53,7 @@ enum StudyNotesBank {
 }
 struct StudyNotesListView:View{
     let curriculum:Curriculum
+    @EnvironmentObject private var purchases: PurchaseManager
     var body:some View{
         List{
             if let resumed = LastStudiedNoteStore.resolve() {
@@ -82,7 +83,7 @@ struct StudyNotesListView:View{
                 NavigationLink { RevisionMaterialsView() } label: {
                     Label("Full revision material pack", systemImage: "books.vertical.fill")
                 }
-                NavigationLink { CompleteReferenceView() } label: {
+                NavigationLink { premiumDestination(purchases: purchases) { CompleteReferenceView() } } label: {
                     Label("Practical reference tables", systemImage: "text.book.closed.fill")
                 }
             }

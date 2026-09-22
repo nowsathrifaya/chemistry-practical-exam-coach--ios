@@ -65,7 +65,9 @@ struct AdaptiveCoachView: View {
         case .apparatus(let type):
             ApparatusPracticeView(apparatusType: type, curriculum: homeViewModel.curriculum, repository: repository, onSaved: { homeViewModel.refreshStats() })
         case .graph(let type):
-            GraphCoachPracticeView(graphType: type, curriculum: homeViewModel.curriculum, repository: repository, onSaved: { homeViewModel.refreshStats() })
+            premiumDestination(purchases: purchases) {
+                GraphCoachPracticeView(graphType: type, curriculum: homeViewModel.curriculum, repository: repository, onSaved: { homeViewModel.refreshStats() })
+            }
         }
     }
 }
