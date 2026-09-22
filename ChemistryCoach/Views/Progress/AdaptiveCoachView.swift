@@ -53,11 +53,7 @@ struct AdaptiveCoachView: View {
         let repository = AttemptRepository(modelContext: modelContext)
         switch action {
         case .qualitative:
-            if purchases.isPremium {
-                QualitativeAnalysisLabView(curriculum: homeViewModel.curriculum)
-            } else {
-                PremiumPaywallView(purchases: purchases)
-            }
+            advancedLabDestination(for: .qualitativeUnknown, curriculum: homeViewModel.curriculum, purchases: purchases)
         case .calculation:
             CalculationPracticeView()
         case .aceTopic(let topic):
@@ -65,11 +61,7 @@ struct AdaptiveCoachView: View {
         case .aceSkill(let skill):
             AcePracticeSessionView(repository: repository, curriculum: homeViewModel.curriculum, filterTopic: nil, filterSkill: skill, isMockExam: false, mockExamMinutes: 10)
         case .simulation(let type):
-            if type.isFree || purchases.isPremium {
-                ChemistryPracticalLabView(type: type, curriculum: homeViewModel.curriculum, repository: repository)
-            } else {
-                PremiumPaywallView(purchases: purchases)
-            }
+            integratedLabDestination(for: type, curriculum: homeViewModel.curriculum, repository: repository, purchases: purchases)
         case .apparatus(let type):
             ApparatusPracticeView(apparatusType: type, curriculum: homeViewModel.curriculum, repository: repository, onSaved: { homeViewModel.refreshStats() })
         case .graph(let type):

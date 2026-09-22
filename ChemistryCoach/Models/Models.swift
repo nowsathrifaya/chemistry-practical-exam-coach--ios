@@ -147,9 +147,11 @@ enum SimulationType: String, CaseIterable, Codable, Identifiable {
     var id: String { rawValue }
 
     /// Only Acid–Base Titration is free; every other integrated practical
-    /// lab requires the "All Experiments" one-time purchase. This is the
-    /// single source of truth other screens should check before navigating
-    /// straight to a `ChemistryPracticalLabView`/`ChemistrySimulationView`.
+    /// lab requires the "All Experiments" one-time purchase. Don't check
+    /// this directly to decide whether to show a lab — route through
+    /// `integratedLabDestination(for:curriculum:repository:purchases:)` in
+    /// PremiumGating.swift instead, which is the single place that combines
+    /// this with the user's purchase state.
     var isFree: Bool { self == .titration }
     var label: String {
         switch self {

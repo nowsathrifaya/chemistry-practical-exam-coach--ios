@@ -224,28 +224,16 @@ private struct ContinueLearningCard: View {
 
     @ViewBuilder
     private func labDestination(for type: SimulationType) -> some View {
-        if type.isFree || purchases.isPremium {
-            let repository = AttemptRepository(modelContext: modelContext)
-            ChemistrySimulationView(type: type, repository: repository, curriculum: homeViewModel.curriculum)
-        } else {
-            PremiumPaywallView(purchases: purchases)
-        }
+        integratedLabDestination(
+            for: type, curriculum: homeViewModel.curriculum,
+            repository: AttemptRepository(modelContext: modelContext),
+            purchases: purchases
+        )
     }
 
     @ViewBuilder
     private func advancedSimulationDestination(for kind: AdvancedSimulationKind) -> some View {
-        if purchases.isPremium {
-            switch kind {
-            case .qualitativeUnknown:
-                QualitativeAnalysisLabView(curriculum: homeViewModel.curriculum)
-            case .waterOfCrystallisation:
-                WaterOfCrystallisationView(curriculum: homeViewModel.curriculum)
-            case .saltPreparation:
-                SaltPreparationView(curriculum: homeViewModel.curriculum)
-            }
-        } else {
-            PremiumPaywallView(purchases: purchases)
-        }
+        advancedLabDestination(for: kind, curriculum: homeViewModel.curriculum, purchases: purchases)
     }
 }
 

@@ -3,29 +3,71 @@ import Foundation
 
 struct GraphDatasetGenerator {
     func generate(type: GraphCoachType, seed: Int, curriculum: Curriculum) -> GraphDataset {
-        var rng=SeededRandomNumberGenerator(seed:seed)
-        let slope:Double
-        var pts:[GraphPoint]=[]
+        var rng = SeededRandomNumberGenerator(seed: seed)
+        var pts: [GraphPoint] = []
+        let computed: Double
+
         switch type {
         case .titrationCurve:
-            slope=1
-            for i in 0..<9 { let x=Double(i*3); let y=x < 12 ? 2.8 + x*0.08 : x < 18 ? 3.8 + (x-12)*0.8 : 8.6 + (x-18)*0.18; pts.append(GraphPoint(x:x,y:y+Double(rng.nextInt(-3,3))/10)) }
+            // The buffer-region slope before the equivalence point. As noted in
+            // GraphGradientMarker's explanation text, a titration curve's gradient
+            // isn't a meaningful physical constant the way it is for the other
+            // graph types, so this is illustrative rather than something students
+            // are drilled to reproduce precisely.
+            let bufferSlope = 0.08
+            for i in 0..<9 {
+                let x = Double(i * 3)
+                let y = x < 12 ? 2.8 + x * bufferSlope : x < 18 ? 3.8 + (x - 12) * 0.8 : 8.6 + (x - 18) * 0.18
+                pts.append(GraphPoint(x: x, y: y + Double(rng.nextInt(-3, 3)) / 10))
+            }
+            computed = bufferSlope
+
         case .rateGasVolume:
-            slope=2.4
-            for i in 0..<8 { let x=Double(i*10); let y=65*(1-exp(-0.08*x)); pts.append(GraphPoint(x:x,y:y+Double(rng.nextInt(-5,5))/10)) }
+            // Volume vs time: V = Vmax(1 - e^-kt), so the initial rate (the tangent
+            // at t = 0, which is what students are asked to read off) is Vmax * k.
+            let vMax = 65.0, k = 0.08
+            for i in 0..<8 {
+                let x = Double(i * 10)
+                let y = vMax * (1 - exp(-k * x))
+                pts.append(GraphPoint(x: x, y: y + Double(rng.nextInt(-5, 5)) / 10))
+            }
+            computed = vMax * k
+
         case .rateConcentration:
-            slope = -0.03
-            for i in 0..<8 { let x=Double(i*10); let y=0.50*exp(-0.06*x); pts.append(GraphPoint(x:x,y:y+Double(rng.nextInt(-3,3))/100)) }
+            // Concentration vs time: C = C0 * e^-kt; initial rate = -C0 * k.
+            let c0 = 0.50, k = 0.06
+            for i in 0..<8 {
+                let x = Double(i * 10)
+                let y = c0 * exp(-k * x)
+                pts.append(GraphPoint(x: x, y: y + Double(rng.nextInt(-3, 3)) / 100))
+            }
+            computed = -c0 * k
+
         case .temperatureChange:
-            slope=0.2
-            for i in 0..<8 { let x=Double(i*30); let y=24+8*(1-exp(-0.06*Double(i))); pts.append(GraphPoint(x:x,y:y+Double(rng.nextInt(-3,3))/10)) }
+            // Temperature vs time: T = T0 + ΔT(1 - e^-kt); initial rate = ΔT * k.
+            // (Previously this used the loop index instead of the actual elapsed
+            // time `x` in the exponent, and the expected gradient was a hard-coded
+            // 0.2 that didn't match the data's real initial slope — so a student
+            // who correctly read the gradient off the plotted points was marked
+            // wrong. Both are fixed by computing everything from the same x.)
+            let t0 = 24.0, deltaT = 8.0, k = 0.002
+            for i in 0..<8 {
+                let x = Double(i * 30)
+                let y = t0 + deltaT * (1 - exp(-k * x))
+                pts.append(GraphPoint(x: x, y: y + Double(rng.nextInt(-3, 3)) / 10))
+            }
+            computed = deltaT * k
+
         case .chromatography:
-            slope=0.62
-            for i in 0..<6 { let x=Double(i+1); pts.append(GraphPoint(x:x,y:slope*x+Double(rng.nextInt(-2,2))/10)) }
+            let slope = 0.62
+            for i in 0..<6 {
+                let x = Double(i + 1)
+                pts.append(GraphPoint(x: x, y: slope * x + Double(rng.nextInt(-2, 2)) / 10))
+            }
+            computed = slope
         }
-        let computed:Double
-        if type == .chromatography { computed=slope } else if type == .rateGasVolume { computed=slope } else if type == .rateConcentration { computed=slope } else { computed=slope }
-        return GraphDataset(type:type,seed:seed,points:pts,expectedGradient:computed)
+
+        return GraphDataset(type: type, seed: seed, points: pts, expectedGradient: computed)
     }
 }
 struct GraphGradientMarker {

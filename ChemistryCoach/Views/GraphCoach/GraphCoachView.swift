@@ -88,11 +88,16 @@ final class GraphCoachPracticeViewModel {
         let xs = dataset.points.map(\.x)
         guard let minX = xs.min(), let maxX = xs.max(), maxX > minX else { return }
         let range = maxX - minX
-        let dx = abs(pickedPoints[1].x - pickedPoints[0].x)
-        pointsTooClose = dx < range * 0.25
+        // Signed on purpose: (y2 - y1) / (x2 - x1) is invariant to which point was
+        // tapped first, since swapping the two points negates both the numerator and
+        // the denominator. Using abs() only on the denominator (as before) broke that
+        // invariance and silently flipped the sign of the auto-filled gradient whenever
+        // the student happened to tap the right-hand point before the left-hand one.
+        let signedDx = pickedPoints[1].x - pickedPoints[0].x
+        pointsTooClose = abs(signedDx) < range * 0.25
         pointsExtrapolated = pickedPoints.contains { $0.x < minX - range * 0.02 || $0.x > maxX + range * 0.02 }
-        if dx > 0 {
-            let gradient = (pickedPoints[1].y - pickedPoints[0].y) / dx
+        if signedDx != 0 {
+            let gradient = (pickedPoints[1].y - pickedPoints[0].y) / signedDx
             studentGradientInput = String(format: "%.3f", gradient)
         }
     }
@@ -254,29 +259,77 @@ struct ScatterPlotCanvasView: View {
     var pickedPoints: [GraphPoint] = []
     var onTap: ((GraphPoint) -> Void)? = nil
 
+    /// Number of gridlines/tick labels drawn along each axis.
+    private let tickCount = 4
+
+    /// Picks a sensible number of decimal places for a tick label given the
+    /// span it needs to distinguish between neighbouring ticks.
+    private func formatTick(_ value: Double, span: Double) -> String {
+        if span < 1 { return String(format: "%.2f", value) }
+        if span < 10 { return String(format: "%.1f", value) }
+        return String(format: "%.0f", value)
+    }
+
     var body: some View {
         GeometryReader { geo in
             let size = geo.size
-            let margin: CGFloat = 36
+            let margin: CGFloat = 42
             let plotRect = CGRect(x: margin, y: 12, width: size.width - margin - 12, height: size.height - margin - 24)
-            let maxX = dataset.points.map(\.x).max() ?? 1
-            let maxY = dataset.points.map(\.y).max() ?? 1
+
+            let xs = dataset.points.map(\.x)
+            let ys = dataset.points.map(\.y)
+            let dataMinX = xs.min() ?? 0, dataMaxX = xs.max() ?? 1
+            let dataMinY = ys.min() ?? 0, dataMaxY = ys.max() ?? 1
+            let rawRangeX = dataMaxX - dataMinX
+            let rawRangeY = dataMaxY - dataMinY
+            // A small margin around the data so points near the edge aren't drawn right
+            // on top of the axes, and — importantly — so a dataset whose values don't
+            // start near zero (e.g. temperature climbing from 24°C) isn't squashed into
+            // a sliver at the top of a chart that always starts at (0, 0). The x-axis
+            // still floors at zero, since every x-quantity here (time, volume, distance)
+            // is physically non-negative and naturally starts there.
+            let padX = rawRangeX > 0 ? rawRangeX * 0.08 : max(abs(dataMaxX), 1) * 0.1
+            let padY = rawRangeY > 0 ? rawRangeY * 0.12 : max(abs(dataMaxY), 1) * 0.1
+            let axisMinX = max(0, dataMinX - padX)
+            let axisMaxX = dataMaxX + padX
+            let axisMinY = max(0, dataMinY - padY)
+            let axisMaxY = dataMaxY + padY
+            let rangeX = max(axisMaxX - axisMinX, 0.0001)
+            let rangeY = max(axisMaxY - axisMinY, 0.0001)
+
+            func point(_ p: GraphPoint) -> CGPoint {
+                CGPoint(
+                    x: plotRect.minX + CGFloat((p.x - axisMinX) / rangeX) * plotRect.width,
+                    y: plotRect.maxY - CGFloat((p.y - axisMinY) / rangeY) * plotRect.height
+                )
+            }
 
             Canvas { context, _ in
+                // Gridlines + numeric tick labels, drawn first so data sits on top.
+                for i in 0...tickCount {
+                    let t = Double(i) / Double(tickCount)
+                    let xVal = axisMinX + t * rangeX
+                    let xPos = plotRect.minX + CGFloat(t) * plotRect.width
+                    var gridX = Path()
+                    gridX.move(to: CGPoint(x: xPos, y: plotRect.minY))
+                    gridX.addLine(to: CGPoint(x: xPos, y: plotRect.maxY))
+                    context.stroke(gridX, with: .color(.primary.opacity(i == 0 ? 0 : 0.08)), lineWidth: 1)
+                    context.draw(Text(formatTick(xVal, span: rangeX)).font(.system(size: 8)), at: CGPoint(x: xPos, y: plotRect.maxY + 10))
+
+                    let yVal = axisMinY + t * rangeY
+                    let yPos = plotRect.maxY - CGFloat(t) * plotRect.height
+                    var gridY = Path()
+                    gridY.move(to: CGPoint(x: plotRect.minX, y: yPos))
+                    gridY.addLine(to: CGPoint(x: plotRect.maxX, y: yPos))
+                    context.stroke(gridY, with: .color(.primary.opacity(i == 0 ? 0 : 0.08)), lineWidth: 1)
+                    context.draw(Text(formatTick(yVal, span: rangeY)).font(.system(size: 8)), at: CGPoint(x: plotRect.minX - 16, y: yPos))
+                }
+
                 var axes = Path()
                 axes.move(to: CGPoint(x: plotRect.minX, y: plotRect.minY))
                 axes.addLine(to: CGPoint(x: plotRect.minX, y: plotRect.maxY))
                 axes.addLine(to: CGPoint(x: plotRect.maxX, y: plotRect.maxY))
                 context.stroke(axes, with: .color(.primary), lineWidth: 1.5)
-
-                guard maxX > 0, maxY > 0 else { return }
-
-                func point(_ p: GraphPoint) -> CGPoint {
-                    CGPoint(
-                        x: plotRect.minX + CGFloat(p.x / maxX) * plotRect.width,
-                        y: plotRect.maxY - CGFloat(p.y / maxY) * plotRect.height
-                    )
-                }
 
                 for p in dataset.points {
                     let center = point(p)
@@ -309,11 +362,11 @@ struct ScatterPlotCanvasView: View {
             .contentShape(Rectangle())
             .gesture(
                 DragGesture(minimumDistance: 0).onEnded { value in
-                    guard maxX > 0, maxY > 0, let onTap else { return }
+                    guard let onTap else { return }
                     let loc = value.location
                     guard plotRect.insetBy(dx: -10, dy: -10).contains(loc) else { return }
-                    let dataX = Double((loc.x - plotRect.minX) / plotRect.width) * maxX
-                    let dataY = Double((plotRect.maxY - loc.y) / plotRect.height) * maxY
+                    let dataX = axisMinX + Double((loc.x - plotRect.minX) / plotRect.width) * rangeX
+                    let dataY = axisMinY + Double((plotRect.maxY - loc.y) / plotRect.height) * rangeY
                     onTap(GraphPoint(x: dataX, y: dataY))
                 }
             )

@@ -19,11 +19,11 @@ struct SimulationListView: View {
             Section("Integrated practical labs") {
                 ForEach(profile.simulations) { type in
                     NavigationLink {
-                        if type.isFree || purchases.isPremium {
-                            ChemistryPracticalLabView(type: type, curriculum: profile.curriculum, repository: AttemptRepository(modelContext: modelContext))
-                        } else {
-                            PremiumPaywallView(purchases: purchases)
-                        }
+                        integratedLabDestination(
+                            for: type, curriculum: profile.curriculum,
+                            repository: AttemptRepository(modelContext: modelContext),
+                            purchases: purchases
+                        )
                     } label: {
                         VStack(alignment: .leading, spacing: 5) {
                             HStack { Image(systemName: icon(for: type)).foregroundStyle(.tint); Text(type.label).font(.headline) }
@@ -36,11 +36,7 @@ struct SimulationListView: View {
 
             Section("Advanced simulations") {
                 NavigationLink {
-                    if purchases.isPremium {
-                        QualitativeAnalysisLabView(curriculum: profile.curriculum)
-                    } else {
-                        PremiumPaywallView(purchases: purchases)
-                    }
+                    advancedLabDestination(for: .qualitativeUnknown, curriculum: profile.curriculum, purchases: purchases)
                 } label: {
                     VStack(alignment: .leading, spacing: 5) {
                         HStack { Image(systemName: "testtube.2").foregroundStyle(.purple); Text("Unknown Sample Laboratory").font(.headline) }
@@ -50,11 +46,7 @@ struct SimulationListView: View {
                 }
 
                 NavigationLink {
-                    if purchases.isPremium {
-                        WaterOfCrystallisationView(curriculum: profile.curriculum)
-                    } else {
-                        PremiumPaywallView(purchases: purchases)
-                    }
+                    advancedLabDestination(for: .waterOfCrystallisation, curriculum: profile.curriculum, purchases: purchases)
                 } label: {
                     VStack(alignment: .leading, spacing: 5) {
                         HStack { Image(systemName: "drop.degreesign.fill").foregroundStyle(.teal); Text("Water of Crystallisation").font(.headline) }
@@ -64,11 +56,7 @@ struct SimulationListView: View {
                 }
 
                 NavigationLink {
-                    if purchases.isPremium {
-                        SaltPreparationView(curriculum: profile.curriculum)
-                    } else {
-                        PremiumPaywallView(purchases: purchases)
-                    }
+                    advancedLabDestination(for: .saltPreparation, curriculum: profile.curriculum, purchases: purchases)
                 } label: {
                     VStack(alignment: .leading, spacing: 5) {
                         HStack { Image(systemName: "cylinder.split.50percent").foregroundStyle(.orange); Text("Salt Preparation").font(.headline) }
@@ -96,12 +84,3 @@ struct SimulationListView: View {
     }
 }
 
-// Kept as a compatibility wrapper for Continue Learning routes created by older builds.
-struct ChemistrySimulationView: View {
-    let type: SimulationType
-    let repository: AttemptRepository
-    let curriculum: Curriculum
-    var body: some View {
-        ChemistryPracticalLabView(type: type, curriculum: curriculum, repository: repository)
-    }
-}
