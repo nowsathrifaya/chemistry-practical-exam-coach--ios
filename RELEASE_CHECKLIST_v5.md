@@ -14,7 +14,7 @@
 ## Before App Store submission
 - [ ] Run XcodeGen on macOS to generate the .xcodeproj from project.yml
 - [ ] Run a full Xcode archive on macOS
-- [ ] Test StoreKit product com.chemistrycoach.all-experiments in the App Store Connect environment
+- [ ] Test StoreKit product com.nowsathrifaya.chemistrycoach.fullunlock in the App Store Connect environment
 - [ ] Test all adaptive navigation destinations on a physical iPhone
 - [ ] Verify SwiftData migration/upgrade from previous installed build
 - [ ] Review all chemistry answer keys against the intended 6092 source materials
