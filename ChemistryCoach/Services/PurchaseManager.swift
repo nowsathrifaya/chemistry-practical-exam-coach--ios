@@ -3,7 +3,7 @@ import StoreKit
 
 @MainActor
 final class PurchaseManager: ObservableObject {
-    static let productID = "com.chemistrycoach.all-experiments"
+    static let productID = "com.nowsathrifaya.chemistrycoach.fullunlock"
 
     @Published private(set) var isPremium = false
     @Published private(set) var product: Product?
