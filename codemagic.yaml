@@ -17,7 +17,7 @@ workflows:
         BUNDLE_ID: "com.nowsathrifaya.chemistrycoach"
         XCODE_PROJECT: "ChemistryCoach.xcodeproj"
         XCODE_SCHEME: "ChemistryCoach"
-        APP_VERSION: "1.1.0"
+        APP_VERSION: "1.1.1"
 
     scripts:
 
