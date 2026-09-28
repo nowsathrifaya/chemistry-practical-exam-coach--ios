@@ -88,7 +88,9 @@ workflows:
             echo "Latest build number on App Store Connect: $LATEST_ASC_BUILD_NUMBER"
           else
             echo "Could not fetch latest build number from App Store Connect (APP_STORE_APP_ID unset or lookup failed) — falling back to \$BUILD_NUMBER."
-            BUILD_NUMBER_VALUE="${BUILD_NUMBER:-2}"
+            # Timestamp (yymmddHHMM) always increases, so it can never collide
+            # with a previously uploaded build.
+            BUILD_NUMBER_VALUE="$(date -u +%y%m%d%H%M)"
           fi
 
           # Safety-net floor: App Store Connect already has build 21 on file
